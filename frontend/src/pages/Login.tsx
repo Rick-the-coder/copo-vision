@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { BookOpen, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
-import axios from 'axios';
+import api from '../services/api';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -34,7 +34,7 @@ const Login = () => {
       formData.append('username', data.email);
       formData.append('password', data.password);
 
-      const response = await axios.post('http://localhost:8000/api/v1/auth/login', formData, {
+      const response = await api.post('/auth/login', formData, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }

@@ -47,6 +47,7 @@ import PredictionDashboardPage from './pages/dashboard/ml/PredictionDashboard';
 
 // Phase 7 Imports (Analytics & Reports)
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import Settings from './pages/dashboard/Settings';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -105,7 +106,7 @@ function App() {
             {/* Phase 7 Analytics Routes */}
             <Route path="analytics-dashboard" element={<AnalyticsDashboard />} />
 
-            <Route path="settings" element={<div className="p-6">Settings (Coming Soon)</div>} />
+            <Route path="settings" element={<Settings />} />
           </Route>
           
           <Route path="*" element={<Navigate to="/" replace />} />

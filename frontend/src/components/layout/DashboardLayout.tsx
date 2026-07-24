@@ -45,67 +45,35 @@ const DashboardLayout = () => {
     navigate('/login');
   };
 
-  // Grouped Navigation Array
+  // Grouped Navigation Array (15% MVP Core)
   const navGroups = [
     {
       label: "Overview",
       items: [
         { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-[18px] h-[18px]" /> },
-        { name: 'Analytics Dashboard', path: '/dashboard/analytics-dashboard', icon: <BarChart2 className="w-[18px] h-[18px]" /> },
-      ]
-    },
-    {
-      label: "AI & Predictions",
-      items: [
-        { name: 'ML Datasets', path: '/dashboard/ml-datasets', icon: <Database className="w-[18px] h-[18px]" /> },
-        { name: 'Model Training', path: '/dashboard/ml-training', icon: <BrainCircuit className="w-[18px] h-[18px]" /> },
-        { name: 'AI Prediction', path: '/dashboard/ml-prediction', icon: <Activity className="w-[18px] h-[18px]" /> },
-      ]
-    },
-    {
-      label: "OBE Calculations",
-      items: [
-        { name: 'Calculate CO', path: '/dashboard/calculate-co', icon: <PlayCircle className="w-[18px] h-[18px]" /> },
-        { name: 'Calculation History', path: '/dashboard/calculation-history', icon: <BookOpen className="w-[18px] h-[18px]" /> },
-        { name: 'Calculate PO', path: '/dashboard/calculate-po', icon: <PlayCircle className="w-[18px] h-[18px]" /> },
-        { name: 'Student PO View', path: '/dashboard/student-po-view', icon: <Users className="w-[18px] h-[18px]" /> },
-        { name: 'Student CO View', path: '/dashboard/student-co-view', icon: <Users className="w-[18px] h-[18px]" /> },
-      ]
-    },
-    {
-      label: "Academic Management",
-      items: [
-        { name: 'Marks Entry', path: '/dashboard/marks-entry', icon: <Users className="w-[18px] h-[18px]" /> },
-        { name: 'Assessments', path: '/dashboard/assessments', icon: <Calendar className="w-[18px] h-[18px]" /> },
-        { name: 'Question Bank', path: '/dashboard/question-bank', icon: <BookOpen className="w-[18px] h-[18px]" /> },
-        { name: 'Courses', path: '/dashboard/courses', icon: <BookOpen className="w-[18px] h-[18px]" /> },
-        { name: 'Subjects', path: '/dashboard/subjects', icon: <BookOpen className="w-[18px] h-[18px]" /> },
-        { name: 'Offerings', path: '/dashboard/offerings', icon: <BookOpen className="w-[18px] h-[18px]" /> },
-      ]
-    },
-    {
-      label: "Configurations",
-      items: [
-        { name: 'CO Configuration', path: '/dashboard/co-config', icon: <Settings className="w-[18px] h-[18px]" /> },
-        { name: 'PO Configuration', path: '/dashboard/po-config', icon: <Settings className="w-[18px] h-[18px]" /> },
-        { name: 'CO-PO Mapping', path: '/dashboard/co-po-mapping', icon: <Settings className="w-[18px] h-[18px]" /> },
-        { name: 'Assessment Weightage', path: '/dashboard/weightage', icon: <Settings className="w-[18px] h-[18px]" /> },
-        { name: 'Attainment Rules', path: '/dashboard/attainment-rules', icon: <Settings className="w-[18px] h-[18px]" /> },
-        { name: 'Program Outcomes', path: '/dashboard/program-outcomes', icon: <BookOpen className="w-[18px] h-[18px]" /> },
-        { name: 'Course Outcomes', path: '/dashboard/course-outcomes', icon: <BookOpen className="w-[18px] h-[18px]" /> },
-        { name: 'Assessment Types', path: '/dashboard/assessment-types', icon: <Settings className="w-[18px] h-[18px]" /> },
       ]
     },
     {
       label: "Institution Setup",
       items: [
         { name: 'Departments', path: '/dashboard/departments', icon: <Building2 className="w-[18px] h-[18px]" /> },
-        { name: 'Programs', path: '/dashboard/programs', icon: <Building2 className="w-[18px] h-[18px]" /> },
-        { name: 'Batches', path: '/dashboard/batches', icon: <Users className="w-[18px] h-[18px]" /> },
-        { name: 'Sections', path: '/dashboard/sections', icon: <Users className="w-[18px] h-[18px]" /> },
         { name: 'Faculty', path: '/dashboard/faculty', icon: <GraduationCap className="w-[18px] h-[18px]" /> },
         { name: 'Students', path: '/dashboard/students', icon: <Users className="w-[18px] h-[18px]" /> },
-        { name: 'Users', path: '/dashboard/users', icon: <Users className="w-[18px] h-[18px]" /> },
+      ]
+    },
+    {
+      label: "Academic Management",
+      items: [
+        { name: 'Subjects', path: '/dashboard/subjects', icon: <BookOpen className="w-[18px] h-[18px]" /> },
+        { name: 'Marks Entry', path: '/dashboard/marks-entry', icon: <Users className="w-[18px] h-[18px]" /> },
+      ]
+    },
+    {
+      label: "OBE Foundation",
+      items: [
+        { name: 'Program Outcomes', path: '/dashboard/program-outcomes', icon: <BookOpen className="w-[18px] h-[18px]" /> },
+        { name: 'Course Outcomes', path: '/dashboard/course-outcomes', icon: <BookOpen className="w-[18px] h-[18px]" /> },
+        { name: 'CO-PO Mapping', path: '/dashboard/co-po-mapping', icon: <Settings className="w-[18px] h-[18px]" /> },
       ]
     }
   ];
