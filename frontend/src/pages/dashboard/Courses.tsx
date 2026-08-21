@@ -2,15 +2,23 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit2, Trash2, Search, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import api from '../../services/api';
 
-interface Course {
+const courseSchema = z.object({
+  course_code: z.string().min(1, 'Course code is required'),
+  course_name: z.string().min(1, 'Course name is required'),
+  program: z.string().min(1, 'Program is required'),
+  duration_years: z.number().min(1, 'Duration must be at least 1 year'),
+  department_id: z.number().min(1, 'Department is required'),
+  status: z.boolean(),
+});
+
+type CourseFormData = z.infer<typeof courseSchema>;
+
+interface Course extends CourseFormData {
   id: number;
-  course_name: string;
-  course_code: string;
-  duration: number;
-  department_id: number;
-  status: boolean;
 }
 
 interface Department {
@@ -24,7 +32,9 @@ const Courses = () => {
   const [editingItem, setEditingItem] = useState<Course | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<any>();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<CourseFormData>({
+    resolver: zodResolver(courseSchema)
+  });
 
   const { data: items, isLoading } = useQuery({
     queryKey: ['courses'],
@@ -37,12 +47,12 @@ const Courses = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: (newItem: any) => api.post('/courses', newItem),
+    mutationFn: (newItem: CourseFormData) => api.post('/courses', newItem),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['courses'] }); closeModal(); }
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: { id: number, item: any }) => api.put(`/courses/${data.id}`, data.item),
+    mutationFn: (data: { id: number, item: CourseFormData }) => api.put(`/courses/${data.id}`, data.item),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['courses'] }); closeModal(); }
   });
 
@@ -53,14 +63,14 @@ const Courses = () => {
 
   const openModal = (item: Course | null = null) => {
     setEditingItem(item);
-    if (item) reset(item);
-    else reset({ course_name: '', course_code: '', duration: 4, department_id: '', status: true });
+    if (item) reset({ ...item });
+    else reset({ course_name: '', course_code: '', program: 'UG', duration_years: 4, status: true });
     setIsModalOpen(true);
   };
 
   const closeModal = () => { setIsModalOpen(false); setEditingItem(null); reset(); };
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: CourseFormData) => {
     if (editingItem) updateMutation.mutate({ id: editingItem.id, item: data });
     else createMutation.mutate(data);
   };
@@ -72,17 +82,18 @@ const Courses = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Courses</h2>
+          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Courses</h2>
+          <p className="text-slate-500 text-sm mt-1">Manage academic courses and programs</p>
         </div>
-        <button onClick={() => openModal()} className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg flex items-center gap-2">
+        <button onClick={() => openModal()} className="bg-primary hover:bg-primary-dark text-white px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-colors shadow-sm">
           <Plus className="w-4 h-4" /> Add Course
         </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-200 bg-slate-50">
+        <div className="p-4 border-b border-slate-200 bg-slate-50/50">
           <div className="relative w-full max-w-md">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
@@ -90,35 +101,57 @@ const Courses = () => {
               placeholder="Search courses..." 
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
             />
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="bg-slate-100 text-slate-600 text-sm uppercase tracking-wider">
-                <th className="p-4 font-semibold">Code</th>
-                <th className="p-4 font-semibold">Name</th>
-                <th className="p-4 font-semibold">Duration (Yrs)</th>
-                <th className="p-4 font-semibold">Dept ID</th>
-                <th className="p-4 font-semibold text-right">Actions</th>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-[13px] uppercase tracking-wider font-semibold">
+                <th className="p-4 w-24">Code</th>
+                <th className="p-4">Name</th>
+                <th className="p-4">Program</th>
+                <th className="p-4">Duration</th>
+                <th className="p-4">Department</th>
+                <th className="p-4">Status</th>
+                <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-slate-100">
               {isLoading ? (
-                <tr><td colSpan={5} className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" /></td></tr>
+                <tr><td colSpan={7} className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-primary/60" /></td></tr>
+              ) : filteredItems.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-12 text-center text-slate-500">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-3">
+                        <Search className="w-6 h-6 text-slate-400" />
+                      </div>
+                      <p className="font-medium text-slate-900">No courses found</p>
+                      <p className="text-sm mt-1">Get started by creating a new course.</p>
+                    </div>
+                  </td>
+                </tr>
               ) : (
                 filteredItems.map(item => (
-                  <tr key={item.id} className="hover:bg-slate-50">
-                    <td className="p-4">{item.course_code}</td>
-                    <td className="p-4">{item.course_name}</td>
-                    <td className="p-4">{item.duration}</td>
-                    <td className="p-4">{departments?.find(d => d.id === item.department_id)?.department_name || item.department_id}</td>
+                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="p-4 font-medium text-slate-900">{item.course_code}</td>
+                    <td className="p-4 text-slate-700">{item.course_name}</td>
+                    <td className="p-4 text-slate-700">{item.program}</td>
+                    <td className="p-4 text-slate-700">{item.duration_years} Years</td>
+                    <td className="p-4 text-slate-700">{departments?.find(d => d.id === item.department_id)?.department_name || '-'}</td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${item.status ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
+                        {item.status ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
                     <td className="p-4 text-right">
-                      <button onClick={() => openModal(item)} className="p-2 text-slate-400 hover:text-blue-600"><Edit2 className="w-4 h-4" /></button>
-                      <button onClick={() => { if(window.confirm('Delete?')) deleteMutation.mutate(item.id) }} className="p-2 text-slate-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => openModal(item)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => { if(window.confirm('Delete this course?')) deleteMutation.mutate(item.id) }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"><Trash2 className="w-4 h-4" /></button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -129,32 +162,65 @@ const Courses = () => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold mb-4">{editingItem ? 'Edit Course' : 'Add Course'}</h3>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Code *</label>
-                <input {...register('course_code', { required: true })} className="w-full px-3 py-2 border rounded-lg" />
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200">
+            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-slate-800">{editingItem ? 'Edit Course' : 'Add Course'}</h3>
+              <button onClick={closeModal} className="text-slate-400 hover:text-slate-600 transition-colors">&times;</button>
+            </div>
+            
+            <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Course Name *</label>
+                  <input {...register('course_name')} className={`w-full px-3 py-2.5 bg-white border ${errors.course_name ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : 'border-slate-300 focus:border-primary focus:ring-primary/20'} rounded-lg focus:ring-4 outline-none transition-all text-sm`} placeholder="e.g. B.Tech Computer Science" />
+                  {errors.course_name && <p className="text-red-500 text-xs mt-1.5">{errors.course_name.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Course Code *</label>
+                  <input {...register('course_code')} className={`w-full px-3 py-2.5 bg-white border ${errors.course_code ? 'border-red-300 focus:border-red-500' : 'border-slate-300 focus:border-primary'} rounded-lg outline-none transition-all text-sm`} placeholder="e.g. BTECH-CSE" />
+                  {errors.course_code && <p className="text-red-500 text-xs mt-1.5">{errors.course_code.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Program *</label>
+                  <select {...register('program')} className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-lg outline-none transition-all text-sm focus:border-primary">
+                    <option value="UG">Undergraduate (UG)</option>
+                    <option value="PG">Postgraduate (PG)</option>
+                    <option value="PHD">Doctorate (PhD)</option>
+                    <option value="DIPLOMA">Diploma</option>
+                  </select>
+                  {errors.program && <p className="text-red-500 text-xs mt-1.5">{errors.program.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Duration (Years) *</label>
+                  <input type="number" {...register('duration_years', { valueAsNumber: true })} className={`w-full px-3 py-2.5 bg-white border ${errors.duration_years ? 'border-red-300' : 'border-slate-300 focus:border-primary'} rounded-lg outline-none transition-all text-sm`} min="1" max="6" />
+                  {errors.duration_years && <p className="text-red-500 text-xs mt-1.5">{errors.duration_years.message}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Department *</label>
+                  <select {...register('department_id', { valueAsNumber: true })} className={`w-full px-3 py-2.5 bg-white border ${errors.department_id ? 'border-red-300' : 'border-slate-300 focus:border-primary'} rounded-lg outline-none transition-all text-sm`}>
+                    <option value="">Select Department</option>
+                    {departments?.map(d => <option key={d.id} value={d.id}>{d.department_name}</option>)}
+                  </select>
+                  {errors.department_id && <p className="text-red-500 text-xs mt-1.5">{errors.department_id.message}</p>}
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Name *</label>
-                <input {...register('course_name', { required: true })} className="w-full px-3 py-2 border rounded-lg" />
+              
+              <div className="flex items-center gap-2 pt-2">
+                <input type="checkbox" {...register('status')} id="status" className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary" />
+                <label htmlFor="status" className="text-sm font-medium text-slate-700">Active Status</label>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Duration (Years) *</label>
-                <input type="number" {...register('duration', { required: true, valueAsNumber: true })} className="w-full px-3 py-2 border rounded-lg" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Department *</label>
-                <select {...register('department_id', { required: true, valueAsNumber: true })} className="w-full px-3 py-2 border rounded-lg">
-                  <option value="">Select Department</option>
-                  {departments?.map(d => <option key={d.id} value={d.id}>{d.department_name}</option>)}
-                </select>
-              </div>
-              <div className="pt-4 flex justify-end gap-3">
-                <button type="button" onClick={closeModal} className="px-4 py-2 border rounded-lg">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg">Save</button>
+              
+              <div className="pt-5 mt-5 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onClick={closeModal} className="px-5 py-2.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-sm transition-colors">Cancel</button>
+                <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm flex items-center gap-2 transition-colors shadow-sm disabled:opacity-70">
+                  {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {editingItem ? 'Update Course' : 'Create Course'}
+                </button>
               </div>
             </form>
           </div>

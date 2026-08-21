@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import { 
   LayoutDashboard, Users, BookOpen, LogOut, Menu, X, GraduationCap, Building2, 
   Calendar, Settings, PlayCircle, Database, BrainCircuit, Activity, BarChart2,
@@ -28,9 +28,7 @@ const DashboardLayout = () => {
       const token = localStorage.getItem('token');
       if (!token) { navigate('/login'); return; }
       try {
-        const response = await axios.get('http://localhost:8000/api/v1/users/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get('/users/me');
         setUser(response.data);
       } catch (error) {
         localStorage.removeItem('token');
@@ -45,7 +43,15 @@ const DashboardLayout = () => {
     navigate('/login');
   };
 
-  // Grouped Navigation Array (15% MVP Core)
+  const allowedItems = (role: string) => {
+    switch (role) {
+      case 'ADMIN': return ['Dashboard', 'Departments', 'Faculty', 'Students', 'Subjects', 'Marks Entry', 'Program Outcomes', 'Course Outcomes', 'CO-PO Mapping'];
+      case 'HOD': return ['Dashboard', 'Faculty', 'Students', 'Subjects', 'Marks Entry', 'Program Outcomes', 'Course Outcomes', 'CO-PO Mapping'];
+      case 'FACULTY': return ['Dashboard', 'Students', 'Subjects', 'Marks Entry', 'Course Outcomes', 'CO-PO Mapping'];
+      default: return ['Dashboard'];
+    }
+  };
+
   const navGroups = [
     {
       label: "Overview",
@@ -54,29 +60,49 @@ const DashboardLayout = () => {
       ]
     },
     {
-      label: "Institution Setup",
+      label: "Academic Management",
       items: [
         { name: 'Departments', path: '/dashboard/departments', icon: <Building2 className="w-[18px] h-[18px]" /> },
-        { name: 'Faculty', path: '/dashboard/faculty', icon: <GraduationCap className="w-[18px] h-[18px]" /> },
-        { name: 'Students', path: '/dashboard/students', icon: <Users className="w-[18px] h-[18px]" /> },
+        { name: 'Courses', path: '/dashboard/courses', icon: <GraduationCap className="w-[18px] h-[18px]" /> },
+        { name: 'Subjects', path: '/dashboard/subjects', icon: <BookOpen className="w-[18px] h-[18px]" /> },
+        { name: 'Academic Years', path: '/dashboard/academic-years', icon: <Calendar className="w-[18px] h-[18px]" /> },
       ]
     },
     {
-      label: "Academic Management",
+      label: "Assessment Management",
       items: [
-        { name: 'Subjects', path: '/dashboard/subjects', icon: <BookOpen className="w-[18px] h-[18px]" /> },
+        { name: 'Assessments', path: '/dashboard/assessments', icon: <Activity className="w-[18px] h-[18px]" /> },
+        { name: 'Question Bank', path: '/dashboard/question-bank', icon: <Database className="w-[18px] h-[18px]" /> },
         { name: 'Marks Entry', path: '/dashboard/marks-entry', icon: <Users className="w-[18px] h-[18px]" /> },
       ]
     },
     {
-      label: "OBE Foundation",
+      label: "Outcome Management",
       items: [
-        { name: 'Program Outcomes', path: '/dashboard/program-outcomes', icon: <BookOpen className="w-[18px] h-[18px]" /> },
         { name: 'Course Outcomes', path: '/dashboard/course-outcomes', icon: <BookOpen className="w-[18px] h-[18px]" /> },
         { name: 'CO-PO Mapping', path: '/dashboard/co-po-mapping', icon: <Settings className="w-[18px] h-[18px]" /> },
+        { name: 'CO Attainment', path: '/dashboard/calculate-co', icon: <BarChart2 className="w-[18px] h-[18px]" /> },
+        { name: 'PO Attainment', path: '/dashboard/calculate-po', icon: <BarChart2 className="w-[18px] h-[18px]" /> },
+      ]
+    },
+    {
+      label: "Analytics & AI",
+      items: [
+        { name: 'Analytics', path: '/dashboard/analytics-dashboard', icon: <Activity className="w-[18px] h-[18px]" /> },
+        { name: 'Prediction', path: '/dashboard/ml-prediction', icon: <BrainCircuit className="w-[18px] h-[18px]" /> },
+      ]
+    },
+    {
+      label: "System",
+      items: [
+        { name: 'Reports', path: '/dashboard/reports', icon: <Database className="w-[18px] h-[18px]" /> },
+        { name: 'Settings', path: '/dashboard/settings', icon: <Settings className="w-[18px] h-[18px]" /> },
       ]
     }
-  ];
+  ].map(group => ({
+    ...group,
+    items: group.items // Allowing all roles to see all for now to demonstrate 50% frontend.
+  })).filter(group => group.items.length > 0);
 
   if (!user) return <div className="min-h-screen flex items-center justify-center bg-slate-50">Loading...</div>;
 
@@ -166,8 +192,17 @@ const DashboardLayout = () => {
               <Menu className="w-5 h-5" />
             </button>
             
+            {/* Breadcrumb */}
+            <div className="hidden sm:flex items-center text-[13px] text-slate-500 font-medium">
+               <span>COPO Vision</span>
+               <span className="mx-2 text-slate-300">/</span>
+               <span className="text-slate-800 capitalize">
+                 {location.pathname === '/dashboard' ? 'Overview' : location.pathname.split('/').pop()?.replace(/-/g, ' ')}
+               </span>
+            </div>
+
             {/* Global Search */}
-            <div className="hidden md:flex items-center w-full max-w-sm relative">
+            <div className="hidden md:flex items-center w-full max-w-sm relative ml-4">
               <Search className="w-4 h-4 text-[#9CA3AF] absolute left-3" />
               <input 
                 type="text" 

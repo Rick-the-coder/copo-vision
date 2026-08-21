@@ -47,7 +47,11 @@ import PredictionDashboardPage from './pages/dashboard/ml/PredictionDashboard';
 
 // Phase 7 Imports (Analytics & Reports)
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import ReportsPage from './pages/dashboard/Reports';
 import Settings from './pages/dashboard/Settings';
+
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -59,6 +63,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<AdminDashboard />} />
@@ -105,6 +111,7 @@ function App() {
 
             {/* Phase 7 Analytics Routes */}
             <Route path="analytics-dashboard" element={<AnalyticsDashboard />} />
+            <Route path="reports" element={<ReportsPage />} />
 
             <Route path="settings" element={<Settings />} />
           </Route>

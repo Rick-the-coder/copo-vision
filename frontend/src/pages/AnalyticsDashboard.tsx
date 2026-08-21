@@ -12,12 +12,17 @@ import RadarChart from '../components/charts/RadarChart';
 import GaugeChart from '../components/charts/GaugeChart';
 import PieDistributionChart from '../components/charts/PieDistributionChart';
 import COTrendChart from '../components/charts/COTrendChart';
+import { exportToCSV } from '../utils/exportUtils';
 
 const AnalyticsDashboard = () => {
   const { data: summary, isLoading: isSummaryLoading } = useQuery({ queryKey: ['analytics-summary'], queryFn: async () => (await api.get('/analytics/summary')).data });
   const { data: radarData, isLoading: isRadarLoading } = useQuery({ queryKey: ['analytics-radar'], queryFn: async () => (await api.get('/analytics/po-radar')).data });
   const { data: riskData, isLoading: isRiskLoading } = useQuery({ queryKey: ['analytics-risk'], queryFn: async () => (await api.get('/analytics/risk-distribution')).data });
   const { data: coData, isLoading: isCoLoading } = useQuery({ queryKey: ['analytics-co-trends'], queryFn: async () => (await api.get('/analytics/co-trends')).data });
+
+  const handleExport = () => {
+      if (coData) exportToCSV(coData, 'CO_Attainment_Report');
+  };
 
   if (isSummaryLoading || isRadarLoading || isRiskLoading || isCoLoading) {
     return <div className="flex h-[80vh] items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-primary" /></div>;
@@ -35,7 +40,7 @@ const AnalyticsDashboard = () => {
         actions={
           <>
             <Button variant="outline" icon={<Filter className="w-4 h-4" />}>Filter</Button>
-            <Button variant="primary" icon={<Download className="w-4 h-4" />}>Export Report</Button>
+            <Button onClick={handleExport} variant="primary" icon={<Download className="w-4 h-4" />}>Export Report</Button>
           </>
         }
       />
