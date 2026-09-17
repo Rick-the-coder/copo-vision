@@ -1,121 +1,199 @@
-# COPO Vision
-**Predictive Analytics Platform for NBA Outcome Attainment**
-
-> **Description:** COPO Vision is a comprehensive software platform designed to manage and track NBA (National Board of Accreditation) Outcome Attainments for educational institutions. It provides a full-stack solution (FastAPI + React) for managing Master Data (Departments, Courses, Faculty, Students) with a robust Role-Based Access Control (RBAC) architecture. This repository contains the core foundational architecture, database structure, and a dynamic dashboard interface for managing academic data.
-
----
-
-This is Phase 1 of the COPO Vision software project. It provides the core foundational architecture, including the database, authentication, and Master Data management for Departments, Courses, Subjects, Academic Years, Semesters, Faculty, Students, and Users.
-
-## Features Completed in Phase 1
-- **Database setup**: PostgreSQL via SQLAlchemy and Alembic migrations.
-- **Authentication**: JWT-based stateless authentication, bcrypt password hashing.
-- **RBAC**: Role-Based Access Control middleware for Admin, HOD, Faculty, and Students.
-- **Backend APIs**: Full CRUD operations for all Master Data modules.
-- **Frontend App**: React, TypeScript, Vite, Tailwind CSS.
-- **Dashboard UI**: Fully functional Dashboard Layout with navigation and routing.
-- **Data Tables**: Interactive Master Data grids with add, edit, delete, and search functionality.
-
-*Note: AI Prediction, CO Calculation, PO Calculation, Analytics, and Reports are reserved for Phase 2 and have not been implemented in this phase.*
+<div align="center">
+  <img src="./frontend/public/profile_icon.png" alt="COPO Vision Logo" width="120" />
+  <h1>COPO Vision</h1>
+  <p><strong>Predictive Analytics Platform for NBA Outcome Attainment</strong></p>
+  
+  <p>
+    <img src="https://img.shields.io/badge/Status-Phase%201%20Completed-success" alt="Status" />
+    <img src="https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi" alt="FastAPI" />
+    <img src="https://img.shields.io/badge/Frontend-React%20%7C%20Vite-61DAFB?logo=react" alt="React" />
+    <img src="https://img.shields.io/badge/Database-PostgreSQL-336791?logo=postgresql" alt="PostgreSQL" />
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" />
+  </p>
+</div>
 
 ---
 
-## Project Structure Documentation
+## 📖 Overview
 
-The project is built as a monorepo consisting of a FastAPI backend and a React frontend.
+**COPO Vision** is an enterprise-grade software platform designed to manage, track, and predict NBA (National Board of Accreditation) Outcome Attainments for higher education institutions. The system provides a centralized repository for academic master data and will ultimately leverage Machine Learning to predict student outcomes and generate comprehensive analytical reports.
 
+This repository currently hosts the completion of **Phase 1**, which establishes the robust foundational architecture, secure authentication, and the core Master Data Management system.
+
+---
+
+## ✨ Key Features (Current Progress)
+
+- **Enterprise Security & RBAC:** Secure JWT-based stateless authentication with strict Role-Based Access Control (RBAC) supporting `Admin`, `HOD`, `Faculty`, and `Student` hierarchies.
+- **Master Data Management:** Full CRUD capabilities for Departments, Programs, Courses, Subjects, Academic Years, Semesters, Faculty, and Students.
+- **Dynamic Dashboard Interface:** A highly responsive, Tailwind-powered React dashboard featuring interactive data tables, intelligent search, and pagination.
+- **Scalable Database Architecture:** PostgreSQL backed by SQLAlchemy ORM with automated Alembic migrations for seamless schema evolution.
+- **API First Design:** Fully documented RESTful endpoints powered by FastAPI and OpenAPI/Swagger.
+
+*(Note: Advanced AI Predictions, CO/PO Calculation Engines, and Complex Analytics are slated for Phase 2).*
+
+---
+
+## 🏗️ System Architecture
+
+COPO Vision follows a modern decoupled client-server architecture.
+
+```mermaid
+graph TD
+    %% Nodes
+    Client["💻 Client (React SPA / Vite)"]
+    Gateway["🚀 FastAPI Application"]
+    Auth["🔐 Security / JWT Middleware"]
+    Business["⚙️ Business Logic & Services"]
+    CRUD["📝 Data Access Layer (CRUD)"]
+    ORM["🔗 SQLAlchemy ORM"]
+    DB[("🐘 PostgreSQL Database")]
+    Alembic["🛠️ Alembic Migrations"]
+
+    %% Flow
+    Client -- "REST API (JSON)" --> Gateway
+    Gateway --> Auth
+    Auth -- "Validates & Routes" --> Business
+    Business --> CRUD
+    CRUD --> ORM
+    ORM -- "TCP / SQL" --> DB
+    Alembic -. "Manages Schema" .-> DB
+
+    %% Styling
+    classDef frontend fill:#61DAFB,stroke:#fff,stroke-width:2px,color:#000;
+    classDef backend fill:#009688,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef database fill:#336791,stroke:#fff,stroke-width:2px,color:#fff;
+    
+    class Client frontend;
+    class Gateway,Auth,Business,CRUD,ORM backend;
+    class DB,Alembic database;
 ```
-COPO Vision/
-├── backend/
+
+---
+
+## 🗄️ Core Data Model (Phase 1)
+
+Below is a high-level representation of the core entity relationships established in the database.
+
+```mermaid
+erDiagram
+    DEPARTMENT ||--o{ FACULTY : "employs"
+    DEPARTMENT ||--o{ STUDENT : "enrolls"
+    DEPARTMENT ||--o{ PROGRAM : "offers"
+    
+    PROGRAM ||--o{ COURSE : "contains"
+    COURSE ||--o{ COURSE_OFFERING : "scheduled_as"
+    
+    FACULTY ||--o{ COURSE_OFFERING : "teaches"
+    STUDENT ||--o{ STUDENT_MARK : "earns"
+    COURSE_OFFERING ||--o{ STUDENT_MARK : "has"
+    
+    USER ||--o| STUDENT : "maps_to (Role: Student)"
+    USER ||--o| FACULTY : "maps_to (Role: Faculty)"
+    USER ||--o| DEPARTMENT : "maps_to (Role: HOD)"
+```
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | React 18, Vite, TypeScript, Tailwind CSS, Lucide Icons, Axios, React Hook Form, Zod |
+| **Backend** | Python 3.12+, FastAPI, Pydantic, Passlib (Bcrypt), PyJWT |
+| **Database** | PostgreSQL, SQLAlchemy (ORM), Alembic (Migrations) |
+| **Infrastructure** | GitHub Actions (Planned), Uvicorn |
+
+---
+
+## 📂 Repository Structure
+
+```bash
+COPO-Vision/
+├── backend/                  # FastAPI Application
 │   ├── alembic/              # Database migration scripts
-│   ├── app/
+│   ├── app/                  # Application Source Code
 │   │   ├── api/              # API Routers (v1 endpoints)
-│   │   ├── core/             # Core config and security (JWT, hashing)
-│   │   ├── crud/             # CRUD utility classes for database operations
-│   │   ├── db/               # SQLAlchemy Session and Base classes
-│   │   ├── models/           # SQLAlchemy ORM Models (Tables)
-│   │   ├── schemas/          # Pydantic validation schemas
-│   │   └── main.py           # FastAPI application entry point
-│   ├── .env                  # Backend environment variables
-│   ├── requirements.txt      # Python dependencies
-│   └── seed.py               # Database seeding script (Admin credentials)
+│   │   ├── core/             # Core configurations & security
+│   │   ├── crud/             # Database access utilities
+│   │   ├── models/           # SQLAlchemy ORM Tables
+│   │   └── schemas/          # Pydantic validation models
+│   └── seed.py               # Database initialization script
 │
-└── frontend/
-    ├── src/
-    │   ├── components/       # Reusable UI components (DashboardLayout)
-    │   ├── pages/            # React pages (Landing, Login, Master Data grids)
-    │   ├── services/         # Axios API client with interceptors
-    │   ├── App.tsx           # React Router configuration
-    │   └── main.tsx          # React application entry point
-    ├── tailwind.config.js    # Tailwind CSS configuration
-    └── package.json          # Node.js dependencies
+├── frontend/                 # React UI Application
+│   ├── src/                  # Frontend Source Code
+│   │   ├── components/       # Reusable layout and UI components
+│   │   ├── pages/            # View components (Login, Dashboards)
+│   │   └── services/         # Axios API clients
+│   └── tailwind.config.js    # Tailwind styling config
+│
+├── scripts/                  # Utility and code-generation scripts
+└── .github/                  # Enterprise GitHub Templates (Issues/PRs)
 ```
 
 ---
 
-## Installation Guide
+## 🚀 Installation & Setup
 
 ### Prerequisites
-- Python 3.12+
-- Node.js 18+
-- PostgreSQL Server running locally or remotely
+- **Python 3.12+**
+- **Node.js 18+**
+- **PostgreSQL Server** (Local or Remote)
 
-### Backend Setup
-1. Open a terminal and navigate to the `backend` directory.
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Configure your `.env` file (see Environment Variables below).
-5. Run Alembic migrations to create the tables:
-   ```bash
-   export PYTHONPATH=.
-   alembic upgrade head
-   ```
-6. Run the database seed script to create the initial Admin user:
-   ```bash
-   python seed.py
-   ```
-   *Default login: `admin@copovision.com` / `adminpassword`*
-7. Start the FastAPI server:
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-   The backend will be available at `http://localhost:8000`. Swagger documentation is at `/docs`.
-
-### Frontend Setup
-1. Open a new terminal and navigate to the `frontend` directory.
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the Vite development server:
-   ```bash
-   npm run dev
-   ```
-4. Open the frontend in your browser at `http://localhost:5173`.
-
----
-
-## Environment Variables
-
-The backend requires an `.env` file in the `backend/` directory with the following keys:
-
+### 1. Database Configuration
+Ensure PostgreSQL is running. Create a `.env` file in the `backend/` directory:
 ```ini
 PROJECT_NAME="COPO Vision API"
 API_V1_STR="/api/v1"
-SECRET_KEY="<A_VERY_SECURE_RANDOM_STRING_HERE>"
+SECRET_KEY="your-super-secret-jwt-key"
 ACCESS_TOKEN_EXPIRE_MINUTES=1440
 
-# PostgreSQL Configuration
 POSTGRES_SERVER="localhost"
 POSTGRES_USER="postgres"
 POSTGRES_PASSWORD="password"
 POSTGRES_DB="copovision"
 ```
-*(Ensure `POSTGRES_USER` matches your local Mac user or postgres superuser).*
+
+### 2. Backend Setup
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate      # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Run migrations to build the schema
+export PYTHONPATH=.
+alembic upgrade head
+
+# Seed initial admin and mock users
+python seed.py
+python add_users.py
+
+# Start the server
+uvicorn app.main:app --reload
+```
+*API Documentation available at: `http://localhost:8000/docs`*
+
+### 3. Frontend Setup
+```bash
+cd frontend
+npm install
+
+# Start development server
+npm run dev
+```
+*Application available at: `http://localhost:5173`*
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions to COPO Vision! Please review our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) before submitting pull requests. 
+
+If you find a bug or have a feature request, please use the templates provided in the Issues tab. For security vulnerabilities, refer to our [Security Policy](SECURITY.md).
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
