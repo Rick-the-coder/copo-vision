@@ -11,6 +11,9 @@ from app.models.student import Student
 
 router = APIRouter()
 
+from app.models.course_outcome import CourseOutcome
+from app.models.po_models import ProgramOutcome
+
 @router.get("/")
 def get_dashboard_stats(session: SessionDep, current_user: CurrentUser) -> Any:
     """
@@ -23,4 +26,6 @@ def get_dashboard_stats(session: SessionDep, current_user: CurrentUser) -> Any:
         "subjects": session.query(func.count(Subject.id)).scalar() or 0,
         "faculty": session.query(func.count(Faculty.id)).scalar() or 0,
         "students": session.query(func.count(Student.id)).scalar() or 0,
+        "cos": session.query(func.count(CourseOutcome.id)).scalar() or 0,
+        "pos": session.query(func.count(ProgramOutcome.id)).scalar() or 0,
     }

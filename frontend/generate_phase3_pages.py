@@ -27,7 +27,13 @@ pages = {
             {"name": "assessment_name", "label": "Name", "type": "text"},
             {"name": "assessment_type_id", "label": "Type ID", "type": "number"},
             {"name": "course_id", "label": "Course ID", "type": "number"},
+            {"name": "subject_id", "label": "Subject ID", "type": "number"},
+            {"name": "semester_id", "label": "Semester ID", "type": "number"},
+            {"name": "academic_year_id", "label": "Academic Year ID", "type": "number"},
+            {"name": "faculty_id", "label": "Faculty ID", "type": "number"},
+            {"name": "schedule_date", "label": "Schedule Date", "type": "date"},
             {"name": "maximum_marks", "label": "Max Marks", "type": "number"},
+            {"name": "passing_marks", "label": "Passing Marks", "type": "number"},
             {"name": "weightage", "label": "Weightage", "type": "number"}
         ]
     },
@@ -36,9 +42,12 @@ pages = {
         "interface": "QuestionBank",
         "fields": [
             {"name": "course_id", "label": "Course ID", "type": "number"},
+            {"name": "unit", "label": "Unit", "type": "number"},
             {"name": "question_number", "label": "Q. No", "type": "text"},
             {"name": "question_text", "label": "Question", "type": "text"},
-            {"name": "maximum_marks", "label": "Max Marks", "type": "number"},
+            {"name": "maximum_marks", "label": "Marks", "type": "number"},
+            {"name": "question_type", "label": "Type", "type": "text"},
+            {"name": "difficulty_level", "label": "Difficulty", "type": "text"},
             {"name": "bloom_level", "label": "Bloom Level", "type": "text"},
             {"name": "co_id", "label": "CO ID", "type": "number"}
         ]

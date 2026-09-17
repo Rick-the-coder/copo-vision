@@ -31,9 +31,9 @@ const AdminDashboard = () => {
     { name: 'Total Subjects', value: statsData?.subjects || 0, icon: <BookOpen className="w-5 h-5" />, color: 'bg-purple-50 text-purple-600' },
     { name: 'Total Students', value: statsData?.students || 0, icon: <Users className="w-5 h-5" />, color: 'bg-blue-50 text-blue-600' },
     { name: 'Total Faculty', value: statsData?.faculty || 0, icon: <Users className="w-5 h-5" />, color: 'bg-rose-50 text-rose-600' },
-    { name: 'Avg CO Attainment', value: `${statsData?.avg_co_attainment || 0}%`, icon: <BarChart2 className="w-5 h-5" />, color: 'bg-teal-50 text-teal-600' },
-    { name: 'Avg PO Attainment', value: `${statsData?.avg_po_attainment || 0}%`, icon: <BarChart2 className="w-5 h-5" />, color: 'bg-orange-50 text-orange-600' },
-    { name: 'Assessments Done', value: statsData?.assessments_completed || 0, icon: <Activity className="w-5 h-5" />, color: 'bg-cyan-50 text-cyan-600' },
+    { name: 'Total Users', value: statsData?.users || 0, icon: <Users className="w-5 h-5" />, color: 'bg-teal-50 text-teal-600' },
+    { name: 'Course Outcomes', value: statsData?.cos || 0, icon: <BarChart2 className="w-5 h-5" />, color: 'bg-orange-50 text-orange-600' },
+    { name: 'Program Outcomes', value: statsData?.pos || 0, icon: <Activity className="w-5 h-5" />, color: 'bg-cyan-50 text-cyan-600' },
   ];
 
   const coAttainmentData = [

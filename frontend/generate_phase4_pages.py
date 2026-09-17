@@ -26,7 +26,8 @@ pages = {
         "fields": [
             {"name": "assessment_type_id", "label": "Type ID", "type": "number"},
             {"name": "course_id", "label": "Course ID", "type": "number"},
-            {"name": "weightage_percentage", "label": "Weightage (%)", "type": "number"}
+            {"name": "weightage_percentage", "label": "Weightage (%)", "type": "number"},
+            {"name": "is_active", "label": "Is Active", "type": "checkbox"}
         ]
     }
 }
@@ -149,7 +150,7 @@ for page_name, config in pages.items():
     endpoint = config["endpoint"]
     fields = config["fields"]
     
-    interfaces_fields = "\n".join([f"  {f['name']}: {'number' if f['type'] == 'number' else 'string'};" for f in fields])
+    interfaces_fields = "\n".join([f"  {f['name']}: {'boolean' if f['type'] == 'checkbox' else ('number' if f['type'] == 'number' else 'string')};" for f in fields])
     table_headers = "\n".join([f"                <th className=\"p-4\">{f['label']}</th>" for f in fields])
     table_cells = "\n".join([f"                    <td className=\"p-4\">{{item.{f['name']}}}</td>" for f in fields])
     

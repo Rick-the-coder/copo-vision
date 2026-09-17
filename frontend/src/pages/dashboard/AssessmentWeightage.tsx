@@ -104,6 +104,10 @@ const AssessmentWeightagePage = () => {
               <div><label className="block text-sm mb-1">Assessment Type ID</label><input type="number" {...register('assessment_type_id', {required: true, valueAsNumber: true})} className="w-full px-3 py-2 border rounded-lg" /></div>
               <div><label className="block text-sm mb-1">Course ID</label><input type="number" {...register('course_id', {required: true, valueAsNumber: true})} className="w-full px-3 py-2 border rounded-lg" /></div>
               <div><label className="block text-sm mb-1">Weightage (%)</label><input type="number" step="0.1" {...register('weightage_percentage', {required: true, valueAsNumber: true})} className="w-full px-3 py-2 border rounded-lg" /></div>
+              <div className="flex items-center gap-2 pt-2">
+                <input type="checkbox" {...register('is_active')} id="is_active" className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary" />
+                <label htmlFor="is_active" className="text-sm font-medium text-slate-700">Active Status</label>
+              </div>
               <div className="pt-4 flex justify-end gap-3">
                 <button type="button" onClick={closeModal} className="px-4 py-2 border rounded-lg">Cancel</button>
                 <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg">Save</button>

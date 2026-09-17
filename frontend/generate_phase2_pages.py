@@ -49,8 +49,9 @@ pages = {
         "fields": [
             {"name": "curriculum_name", "label": "Name", "type": "text"},
             {"name": "version", "label": "Version", "type": "text"},
-            {"name": "department_id", "label": "Dept ID", "type": "number"},
-            {"name": "program_id", "label": "Program ID", "type": "number"}
+            {"name": "department_id", "label": "Department ID", "type": "number"},
+            {"name": "program_id", "label": "Program ID", "type": "number"},
+            {"name": "courses_included", "label": "Courses Included", "type": "text"}
         ]
     }
 }

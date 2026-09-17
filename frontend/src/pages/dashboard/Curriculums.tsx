@@ -10,6 +10,7 @@ interface Curriculum {
   version: string;
   department_id: number;
   program_id: number;
+  courses_included: string;
   status: boolean;
 }
 
@@ -108,6 +109,7 @@ const CurriculumsPage = () => {
               <div><label className="block text-sm mb-1">Version</label><input {...register('version', {required: true})} className="w-full px-3 py-2 border rounded-lg" /></div>
               <div><label className="block text-sm mb-1">Department ID</label><input type="number" {...register('department_id', {required: true, valueAsNumber: true})} className="w-full px-3 py-2 border rounded-lg" /></div>
               <div><label className="block text-sm mb-1">Program ID</label><input type="number" {...register('program_id', {required: true, valueAsNumber: true})} className="w-full px-3 py-2 border rounded-lg" /></div>
+              <div><label className="block text-sm mb-1">Courses Included</label><input {...register('courses_included')} className="w-full px-3 py-2 border rounded-lg" placeholder="e.g. CS101, CS102" /></div>
               <div className="pt-4 flex justify-end gap-3">
                 <button type="button" onClick={closeModal} className="px-4 py-2 border rounded-lg">Cancel</button>
                 <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg">Save</button>

@@ -11,6 +11,10 @@ const assessmentSchema = z.object({
   assessment_type_id: z.number().min(1, 'Assessment type is required'),
   course_id: z.number().min(1, 'Course is required'),
   subject_id: z.number().min(1, 'Subject is required'),
+  semester_id: z.number().min(1, 'Semester is required'),
+  academic_year_id: z.number().min(1, 'Academic year is required'),
+  faculty_id: z.number().min(1, 'Faculty is required'),
+  schedule_date: z.string().optional().nullable(),
   maximum_marks: z.number().min(1, 'Maximum marks must be greater than 0'),
   passing_marks: z.number().min(0, 'Passing marks cannot be negative'),
   weightage: z.number().min(0, 'Weightage cannot be negative').max(100, 'Weightage cannot exceed 100%'),
@@ -76,7 +80,7 @@ const AssessmentsPage = () => {
   const openModal = (item: Assessment | null = null) => {
     setEditingItem(item);
     if (item) reset({ ...item });
-    else reset({ assessment_name: '', maximum_marks: 100, passing_marks: 40, weightage: 10, status: true });
+    else reset({ assessment_name: '', maximum_marks: 100, passing_marks: 40, weightage: 10, status: true, semester_id: 1, academic_year_id: 1, faculty_id: 1, schedule_date: '' });
     setIsModalOpen(true);
   };
 
@@ -213,6 +217,30 @@ const AssessmentsPage = () => {
                       {subjects?.map(s => <option key={s.id} value={s.id}>{s.subject_name}</option>)}
                     </select>
                     {errors.subject_id && <p className="text-red-500 text-xs mt-1.5">{errors.subject_id.message}</p>}
+                  </div>
+                  
+                  <div className="col-span-2 md:col-span-1">
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Semester ID *</label>
+                    <input type="number" {...register('semester_id', { valueAsNumber: true })} className={`w-full px-3 py-2.5 bg-white border ${errors.semester_id ? 'border-red-300' : 'border-slate-300 focus:border-primary'} rounded-lg outline-none transition-all text-sm`} />
+                    {errors.semester_id && <p className="text-red-500 text-xs mt-1.5">{errors.semester_id.message}</p>}
+                  </div>
+
+                  <div className="col-span-2 md:col-span-1">
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Academic Year ID *</label>
+                    <input type="number" {...register('academic_year_id', { valueAsNumber: true })} className={`w-full px-3 py-2.5 bg-white border ${errors.academic_year_id ? 'border-red-300' : 'border-slate-300 focus:border-primary'} rounded-lg outline-none transition-all text-sm`} />
+                    {errors.academic_year_id && <p className="text-red-500 text-xs mt-1.5">{errors.academic_year_id.message}</p>}
+                  </div>
+
+                  <div className="col-span-2 md:col-span-1">
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Faculty ID *</label>
+                    <input type="number" {...register('faculty_id', { valueAsNumber: true })} className={`w-full px-3 py-2.5 bg-white border ${errors.faculty_id ? 'border-red-300' : 'border-slate-300 focus:border-primary'} rounded-lg outline-none transition-all text-sm`} />
+                    {errors.faculty_id && <p className="text-red-500 text-xs mt-1.5">{errors.faculty_id.message}</p>}
+                  </div>
+
+                  <div className="col-span-2 md:col-span-1">
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Schedule Date</label>
+                    <input type="date" {...register('schedule_date')} className={`w-full px-3 py-2.5 bg-white border ${errors.schedule_date ? 'border-red-300' : 'border-slate-300 focus:border-primary'} rounded-lg outline-none transition-all text-sm`} />
+                    {errors.schedule_date && <p className="text-red-500 text-xs mt-1.5">{errors.schedule_date.message}</p>}
                   </div>
                   
                   <div>
