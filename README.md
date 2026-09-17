@@ -1,4 +1,9 @@
-# COPO Vision: Predictive Analytics Platform for NBA Outcome Attainment
+# COPO Vision
+**Predictive Analytics Platform for NBA Outcome Attainment**
+
+> **Description:** COPO Vision is a comprehensive software platform designed to manage and track NBA (National Board of Accreditation) Outcome Attainments for educational institutions. It provides a full-stack solution (FastAPI + React) for managing Master Data (Departments, Courses, Faculty, Students) with a robust Role-Based Access Control (RBAC) architecture. This repository contains the core foundational architecture, database structure, and a dynamic dashboard interface for managing academic data.
+
+---
 
 This is Phase 1 of the COPO Vision software project. It provides the core foundational architecture, including the database, authentication, and Master Data management for Departments, Courses, Subjects, Academic Years, Semesters, Faculty, Students, and Users.
 
