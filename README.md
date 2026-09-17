@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./frontend/public/profile_icon.png" alt="COPO Vision Logo" width="120" />
+  <img src="./frontend/public/logo.jpg" alt="COPO Vision Logo" width="200" />
   <h1>COPO Vision</h1>
   <p><strong>Predictive Analytics Platform for NBA Outcome Attainment</strong></p>
   
