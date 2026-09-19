@@ -1,13 +1,17 @@
 import csv
 import codecs
+import logging
 from typing import Any
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from pydantic import ValidationError
 
 from app.api.deps import SessionDep, CurrentUser
 from app.models.user import UserRole
 from app import crud, schemas
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -25,7 +29,7 @@ def import_csv(
     if current_user.role not in [UserRole.ADMIN, UserRole.HOD]:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
-    if not file.filename.endswith('.csv'):
+    if not file.filename or not file.filename.lower().endswith('.csv'):
         raise HTTPException(status_code=400, detail="Only CSV files are allowed.")
 
     supported_entities = {
@@ -54,24 +58,36 @@ def import_csv(
             # Clean empty strings to None if needed, depending on Pydantic config
             cleaned_row = {k: (v if v.strip() != "" else None) for k, v in row.items()}
             
-            # Simple Duplicate Detection
-            unique_val = cleaned_row.get(unique_field)
-            if unique_val:
-                # We'd ideally need a generic get_by_unique, but for Phase 2 bulk import this suffices as a guard
-                # A more robust check requires custom queries, but we'll try to insert and catch IntegrityError
-                pass
-                
             obj_in = schema_class(**cleaned_row)
             crud_obj.create(session, obj_in=obj_in)
             success_count += 1
         except ValidationError as e:
             error_count += 1
-            errors.append(f"Row {row_num}: Validation Error - {str(e)}")
-        except Exception as e:
-            # Catch DB Integrity Errors (duplicates, FK constraints)
+            error_details = []
+            for err in e.errors():
+                loc = ".".join(str(l) for l in err.get("loc", []) if l != "__root__")
+                msg = err.get("msg", "Invalid value")
+                if loc:
+                    error_details.append(f"{loc}: {msg}")
+                else:
+                    error_details.append(msg)
+            error_str = "; ".join(error_details) if error_details else "Invalid data format"
+            errors.append(f"Row {row_num}: Validation Error - {error_str}")
+        except IntegrityError:
             session.rollback()
             error_count += 1
-            errors.append(f"Row {row_num}: DB Error - {str(e)}")
+            logger.warning("Database integrity error at row %d for entity %s", row_num, entity, exc_info=True)
+            errors.append(f"Row {row_num}: Database integrity error (duplicate record or invalid reference)")
+        except SQLAlchemyError:
+            session.rollback()
+            error_count += 1
+            logger.error("Database error at row %d for entity %s", row_num, entity, exc_info=True)
+            errors.append(f"Row {row_num}: Database operation failed")
+        except Exception:
+            session.rollback()
+            error_count += 1
+            logger.error("Unexpected error at row %d for entity %s", row_num, entity, exc_info=True)
+            errors.append(f"Row {row_num}: Failed to process record")
 
     return {
         "status": "completed",
