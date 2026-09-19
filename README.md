@@ -133,56 +133,142 @@ COPO-Vision/
 
 ---
 
-## 🚀 Installation & Setup
+## 🚀 Installation & Getting Started
 
 ### Prerequisites
-- **Python 3.12+**
-- **Node.js 18+**
-- **PostgreSQL Server** (Local or Remote)
+- **Python 3.12+** ([python.org](https://www.python.org/))
+- **Node.js 18+ & npm** ([nodejs.org](https://nodejs.org/))
+- **PostgreSQL 14+** (Local service or Docker container)
+
+---
 
 ### 1. Database Configuration
-Ensure PostgreSQL is running. Create a `.env` file in the `backend/` directory:
+
+Ensure your PostgreSQL service is running and create the database (e.g. `copovision`).
+
+Create a `.env` file in the `backend/` directory (`backend/.env`):
 ```ini
 PROJECT_NAME="COPO Vision API"
 API_V1_STR="/api/v1"
-SECRET_KEY="your-super-secret-jwt-key"
+SECRET_KEY="your-secure-random-secret-key-min-32-chars"
 ACCESS_TOKEN_EXPIRE_MINUTES=1440
 
 POSTGRES_SERVER="localhost"
+POSTGRES_PORT="5432"
 POSTGRES_USER="postgres"
-POSTGRES_PASSWORD="password"
+POSTGRES_PASSWORD="your_postgres_password"
 POSTGRES_DB="copovision"
 ```
 
-### 2. Backend Setup
-```bash
+---
+
+### 2. Backend Setup & Startup
+
+#### A. Setup Environment & Install Dependencies
+
+**On Windows (PowerShell):**
+```powershell
+cd backend
+
+# 1. Create and activate virtual environment
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+
+# 2. Upgrade pip and install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+**On Windows (Command Prompt - CMD):**
+```cmd
 cd backend
 python -m venv venv
-source venv/bin/activate      # On Windows: venv\Scripts\activate
+venv\Scripts\activate.bat
+pip install --upgrade pip
 pip install -r requirements.txt
+```
 
-# Run migrations to build the schema
-export PYTHONPATH=.
+**On Linux / macOS (Bash / Zsh):**
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+#### B. Database Migrations & Data Seeding
+
+With your virtual environment activated:
+```bash
+# 1. Apply Alembic migrations to build tables
 alembic upgrade head
 
-# Seed initial admin and mock users
+# 2. Seed default Super Admin user (admin@copovision.com / adminpassword)
 python seed.py
+
+# 3. (Optional) Seed demo data for courses, faculty, students, and attainment rules
+python seed_demo.py
 python add_users.py
-
-# Start the server
-uvicorn app.main:app --reload
 ```
-*API Documentation available at: `http://localhost:8000/docs`*
 
-### 3. Frontend Setup
+#### C. Start the Backend API Server
+
+```bash
+# Start FastAPI with auto-reload
+uvicorn app.main:app --reload --port 8000
+```
+*Or via python module:*
+```bash
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+- 🌐 **Base API URL:** `http://localhost:8000`
+- 📑 **Swagger Interactive Docs:** `http://localhost:8000/docs`
+- 📖 **ReDoc Documentation:** `http://localhost:8000/redoc`
+
+#### D. Run Backend Test Suite
+
+```bash
+# Run all tests
+python -m pytest -v -W ignore
+
+# Run security & authentication regression tests
+python -m pytest tests/test_auth_status.py -v -W ignore
+```
+
+---
+
+### 3. Frontend Setup & Startup
+
+Open a new terminal window:
+
 ```bash
 cd frontend
+
+# 1. Install npm dependencies
 npm install
 
-# Start development server
+# 2. Start the Vite development server
 npm run dev
 ```
-*Application available at: `http://localhost:5173`*
+
+- 🖥️ **Frontend Application URL:** `http://localhost:5173`
+- 🔨 **Production Build:** `npm run build`
+- 👁️ **Preview Build:** `npm run preview`
+
+---
+
+### 4. Default Seed Credentials
+
+After running `python seed.py` and `python add_users.py`:
+
+| Role | Email | Default Password | Access Level |
+| :--- | :--- | :--- | :--- |
+| **Super Admin** | `admin@copovision.com` | `adminpassword` | Full system administration & user management |
+| **Admin** | `admin@example.com` | `password123` | Department & master data administration |
+| **Faculty** | *(generated in seed)* | `password123` | Course management, assessments & marks entry |
+| **Student** | *(generated in seed)* | `password123` | Attainment & scorecard view |
 
 ---
 
