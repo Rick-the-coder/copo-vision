@@ -1,20 +1,30 @@
-import pandas as pd
-import numpy as np
-from fastapi import UploadFile, HTTPException
 import os
 import shutil
+import uuid
+from pathlib import Path
+from fastapi import UploadFile, HTTPException
+import numpy as np
+import pandas as pd
 
 UPLOAD_DIR = "datasets_storage"
 
 class DatasetService:
     @staticmethod
     def process_and_save_upload(file: UploadFile, version_name: str) -> dict:
-        if not file.filename.endswith('.csv'):
+        if not file.filename or not file.filename.lower().endswith('.csv'):
             raise HTTPException(status_code=400, detail="Only CSV files are supported currently.")
             
         os.makedirs(UPLOAD_DIR, exist_ok=True)
-        file_path = os.path.join(UPLOAD_DIR, f"{version_name}.csv")
-        
+        storage_id = uuid.uuid4().hex
+        filename = f"{storage_id}.csv"
+        file_path = os.path.join(UPLOAD_DIR, filename)
+
+        # Verify path containment inside UPLOAD_DIR
+        resolved_upload_dir = Path(UPLOAD_DIR).resolve()
+        resolved_file_path = Path(file_path).resolve()
+        if not resolved_file_path.is_relative_to(resolved_upload_dir):
+            raise HTTPException(status_code=500, detail="Invalid storage path configuration.")
+
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
             
