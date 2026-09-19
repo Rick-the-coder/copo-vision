@@ -38,6 +38,11 @@ def get_current_user(db: SessionDep, token: TokenDep) -> User:
     user = crud.user.get(db, id=int(token_data.sub))
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    if not user.status:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user",
+        )
     return user
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
