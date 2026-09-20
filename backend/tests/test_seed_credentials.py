@@ -1,127 +1,83 @@
 import os
+import sys
 from unittest.mock import MagicMock, patch
 import pytest
+from werkzeug.security import check_password_hash
 
-from app.models.user import User, UserRole
-from app.core import security
-from seed import init_db
-from add_users import create_user_if_not_exists
+# Add backend directory to sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-
-def test_seed_requires_admin_password_when_missing():
-    """Verify that seed.py fails closed with RuntimeError when SEED_ADMIN_PASSWORD is missing/empty."""
-    mock_db = MagicMock()
-
-    # Clear SEED_ADMIN_PASSWORD if set
-    env_vars = {"SEED_ADMIN_PASSWORD": ""}
-
-    with patch.dict(os.environ, env_vars, clear=False):
-        with patch("seed.SessionLocal", return_value=mock_db):
-            with patch("app.crud.user.get_by_email", return_value=None):
-                with pytest.raises(RuntimeError) as exc_info:
-                    init_db()
-                assert "SEED_ADMIN_PASSWORD" in str(exc_info.value)
-                assert "must be set" in str(exc_info.value)
+from create_user import create_user
 
 
-def test_seed_init_db_with_custom_env_credentials():
-    """Verify that seed.py uses SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD from environment."""
-    mock_db = MagicMock()
-    custom_email = "secure_admin@customdomain.org"
-    custom_password = "SuperSecurePassword999!"
-
+def test_create_user_fails_closed_when_password_missing():
+    """Verify that create_user() fails closed with RuntimeError when password is missing/empty."""
     env_vars = {
-        "SEED_ADMIN_EMAIL": custom_email,
-        "SEED_ADMIN_PASSWORD": custom_password,
+        "SEED_USER_PASSWORD": "",
+        "DEFAULT_USER_PASSWORD": "",
     }
-
-    created_user_obj = None
-
-    def fake_create(db, *, obj_in):
-        nonlocal created_user_obj
-        created_user_obj = obj_in
-        user = User(
-            id=1,
-            email=obj_in.email,
-            name=obj_in.name,
-            role=obj_in.role,
-            status=obj_in.status,
-            password=security.get_password_hash(obj_in.password),
-        )
-        return user
-
-    with patch.dict(os.environ, env_vars, clear=False):
-        with patch("seed.SessionLocal", return_value=mock_db):
-            with patch("app.crud.user.get_by_email", return_value=None):
-                with patch("app.crud.user.create", side_effect=fake_create):
-                    init_db()
-
-    assert created_user_obj is not None
-    assert created_user_obj.email == custom_email
-    assert created_user_obj.password == custom_password
-    assert created_user_obj.role == UserRole.ADMIN
-    assert created_user_obj.status is True
-
-
-def test_seed_init_db_skips_if_admin_already_exists():
-    """Verify that seed.py does not recreate or overwrite admin if already present (no password needed)."""
-    mock_db = MagicMock()
-    existing_user = MagicMock(spec=User)
-    existing_user.email = "admin@copovision.com"
-
-    # Even without SEED_ADMIN_PASSWORD set, existing admin check should succeed without error
-    env_vars = {"SEED_ADMIN_PASSWORD": ""}
-
-    with patch.dict(os.environ, env_vars, clear=False):
-        with patch("seed.SessionLocal", return_value=mock_db):
-            with patch("app.crud.user.get_by_email", return_value=existing_user):
-                with patch("app.crud.user.create") as mock_create:
-                    init_db()
-                    mock_create.assert_not_called()
-
-
-def test_add_users_requires_default_password_when_missing():
-    """Verify that add_users.py fails closed with RuntimeError when DEFAULT_USER_PASSWORD is missing/empty."""
-    mock_session = MagicMock()
-    mock_query = MagicMock()
-    mock_session.query.return_value = mock_query
-    mock_query.filter_by.return_value.first.return_value = None
-
-    env_vars = {"DEFAULT_USER_PASSWORD": ""}
-
     with patch.dict(os.environ, env_vars, clear=False):
         with pytest.raises(RuntimeError) as exc_info:
-            create_user_if_not_exists(
-                session=mock_session,
-                email="faculty1@university.edu",
-                name="Dr. Smith",
-                role=UserRole.FACULTY,
-            )
-        assert "DEFAULT_USER_PASSWORD" in str(exc_info.value)
+            create_user()
+        assert "SEED_USER_PASSWORD or DEFAULT_USER_PASSWORD" in str(exc_info.value)
         assert "must be set" in str(exc_info.value)
 
 
-def test_add_users_custom_default_password():
-    """Verify that add_users.py respects explicitly provided DEFAULT_USER_PASSWORD environment variable."""
-    mock_session = MagicMock()
-    mock_query = MagicMock()
-    mock_session.query.return_value = mock_query
-    mock_query.filter_by.return_value.first.return_value = None
+def test_create_user_succeeds_with_env_password():
+    """Verify that create_user() reads password from environment and hashes it properly."""
+    custom_password = "SecureFacultyPassword123!"
+    env_vars = {
+        "SEED_USER_PASSWORD": custom_password,
+        "SEED_USERNAME": "faculty_test",
+        "SEED_FULL_NAME": "Test Professor",
+        "SEED_ROLE": "faculty",
+    }
 
-    custom_default_pw = "CustomUserDefaultPass123!"
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.cursor.return_value = mock_cursor
 
-    with patch.dict(os.environ, {"DEFAULT_USER_PASSWORD": custom_default_pw}, clear=False):
-        user = create_user_if_not_exists(
-            session=mock_session,
-            email="faculty1@university.edu",
-            name="Dr. Smith",
-            role=UserRole.FACULTY,
-        )
+    with patch.dict(os.environ, env_vars, clear=False):
+        with patch("create_user.get_db_connection", return_value=mock_conn):
+            create_user()
 
-    assert user.email == "faculty1@university.edu"
-    assert user.role == UserRole.FACULTY
-    assert user.status is True
-    # Password must be hashed and verifiable with the custom password
-    assert security.verify_password(custom_default_pw, user.password)
-    mock_session.add.assert_called_once_with(user)
-    mock_session.commit.assert_called_once()
+    # Verify query execution
+    assert mock_cursor.execute.called
+    query, params = mock_cursor.execute.call_args[0]
+    username, password_hash, full_name, role, is_active = params
+
+    assert username == "faculty_test"
+    assert full_name == "Test Professor"
+    assert role == "faculty"
+    assert is_active == 1
+    # Check that password hash verifies with the custom password
+    assert check_password_hash(password_hash, custom_password)
+    mock_conn.commit.assert_called_once()
+    mock_conn.close.assert_called_once()
+
+
+def test_create_user_fallback_to_default_user_password():
+    """Verify that create_user() accepts DEFAULT_USER_PASSWORD if SEED_USER_PASSWORD is not set."""
+    custom_default_pw = "DefaultUserSecurePass456!"
+    env_vars = {
+        "SEED_USER_PASSWORD": "",
+        "DEFAULT_USER_PASSWORD": custom_default_pw,
+        "SEED_USERNAME": "admin_user",
+        "SEED_ROLE": "admin",
+    }
+
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.cursor.return_value = mock_cursor
+
+    with patch.dict(os.environ, env_vars, clear=False):
+        with patch("create_user.get_db_connection", return_value=mock_conn):
+            create_user()
+
+    assert mock_cursor.execute.called
+    query, params = mock_cursor.execute.call_args[0]
+    username, password_hash, full_name, role, is_active = params
+
+    assert username == "admin_user"
+    assert role == "admin"
+    assert check_password_hash(password_hash, custom_default_pw)
