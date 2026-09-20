@@ -15,10 +15,16 @@ from sqlalchemy.orm import Session
 
 db = SessionLocal()
 
-def create_user_if_not_exists(session: Session, email: str, name: str, role: UserRole, password: str = "password123"):
+def create_user_if_not_exists(session: Session, email: str, name: str, role: UserRole, password: str = None):
+    if not password:
+        password = os.getenv("DEFAULT_USER_PASSWORD")
     user = session.query(User).filter_by(email=email).first()
     if not user:
-        hashed_pw = security.get_password_hash(password)
+        if not password or not password.strip():
+            raise RuntimeError(
+                "DEFAULT_USER_PASSWORD environment variable must be set before creating seeded users."
+            )
+        hashed_pw = security.get_password_hash(password.strip())
         user = User(
             email=email,
             name=name,
