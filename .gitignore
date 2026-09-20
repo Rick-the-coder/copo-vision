@@ -25,3 +25,6 @@ coverage/
 # Logs
 logs/
 *.log
+backend/seed_files/
+backend/uploads/
+backend/models/*.xlsx
