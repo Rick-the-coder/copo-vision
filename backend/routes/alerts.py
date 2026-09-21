@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify
 from config.database import get_db_connection
 from services.alert_service import generate_co_attainment_alerts, generate_prediction_alerts
+from utils.auth import require_roles
 
 alerts_bp = Blueprint(
     "alerts",
@@ -64,6 +65,7 @@ def get_unread_alerts():
 
 
 @alerts_bp.route("/generate", methods=["POST"])
+@require_roles("admin", "hod")
 def generate_alerts():
     try:
         co_result = generate_co_attainment_alerts()
