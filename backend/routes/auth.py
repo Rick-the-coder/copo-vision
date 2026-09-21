@@ -3,10 +3,9 @@ import datetime
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash
 from config.database import get_db_connection
+from utils.auth import get_jwt_secret
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
-
-SECRET_KEY = "copo-vision-dev-secret-change-in-production"  # move to .env before real deployment
 
 
 @auth_bp.route("/login", methods=["POST"])
@@ -56,7 +55,8 @@ def login():
             "role": user["role"],
             "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=8)
         }
-        token = jwt.encode(token_payload, SECRET_KEY, algorithm="HS256")
+        secret_key = get_jwt_secret()
+        token = jwt.encode(token_payload, secret_key, algorithm="HS256")
 
         return jsonify({
             "status": "success",
