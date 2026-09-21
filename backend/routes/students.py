@@ -66,10 +66,10 @@ def get_students():
             "students": formatted
         }), 200
 
-    except Exception as e:
+    except Exception:
         return jsonify({
             "status": "error",
-            "message": str(e)
+            "message": "Failed to retrieve students"
         }), 500
     finally:
         if conn: conn.close()
@@ -97,8 +97,8 @@ def create_student():
         cursor.close()
 
         return jsonify({"status": "success", "id": new_id, "message": "Student created"}), 201
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to create student"}), 500
     finally:
         if conn: conn.close()
 
@@ -121,8 +121,8 @@ def update_student(student_id):
         cursor.close()
 
         return jsonify({"status": "success", "message": "Student updated"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to update student"}), 500
     finally:
         if conn: conn.close()
 
@@ -138,7 +138,7 @@ def delete_student(student_id):
         cursor.close()
 
         return jsonify({"status": "success", "message": "Student deleted"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to delete student"}), 500
     finally:
         if conn: conn.close()
