@@ -36,7 +36,7 @@ def get_analytics_summary():
             "active_students": students_count,
             "courses_analyzed": courses_count if courses_count > 0 else 4
         }), 200
-    except Exception as e:
+    except Exception:
         return jsonify({
             "status": "success",
             "total_predictions_run": 120,
@@ -85,7 +85,7 @@ def get_po_radar():
                 })
                 
         return jsonify(radar_data), 200
-    except Exception as e:
+    except Exception:
         return jsonify([
             {"subject": "PO1", "A": 85, "fullMark": 100},
             {"subject": "PO2", "A": 78, "fullMark": 100},
@@ -129,7 +129,7 @@ def get_risk_distribution():
             {"name": "High Risk", "value": 9},
             {"name": "Critical Risk", "value": 3}
         ]), 200
-    except Exception as e:
+    except Exception:
         return jsonify([
             {"name": "Low Risk", "value": 68},
             {"name": "Medium Risk", "value": 20},
