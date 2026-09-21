@@ -52,8 +52,8 @@ def dashboard_stats():
             "cos": cos,
             "pos": pos
         }), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve dashboard statistics"}), 500
     finally:
         if cursor:
             cursor.close()
@@ -145,11 +145,10 @@ def dashboard_summary():
             }
         }), 200
 
-    except Exception as e:
-
+    except Exception:
         return jsonify({
             "status": "error",
-            "message": str(e)
+            "message": "Failed to retrieve dashboard summary"
         }), 500
 
     finally:
