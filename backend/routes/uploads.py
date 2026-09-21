@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from config.database import get_db_connection
 
 uploads_bp = Blueprint(
@@ -35,7 +35,9 @@ def upload_marks():
 
     file = request.files["file"]
     assessment_id = request.form.get("assessment_id")
-    uploaded_by = request.form.get("uploaded_by")
+    
+    # Bind caller identity to authenticated user context (prevent client identity spoofing)
+    uploaded_by = g.current_user["user_id"] if hasattr(g, "current_user") and g.current_user else request.form.get("uploaded_by")
 
     if not assessment_id:
         return jsonify({"status": "error", "message": "assessment_id is required"}), 400
