@@ -33,8 +33,8 @@ def get_alerts():
 
         return jsonify({"status": "success", "total_alerts": len(alerts), "alerts": alerts}), 200
 
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve alerts"}), 500
 
 
 @alerts_bp.route("/unread", methods=["GET"])
@@ -60,8 +60,8 @@ def get_unread_alerts():
 
         return jsonify({"status": "success", "total_unread": len(alerts), "alerts": alerts}), 200
 
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve unread alerts"}), 500
 
 
 @alerts_bp.route("/generate", methods=["POST"])
@@ -77,5 +77,5 @@ def generate_alerts():
             "prediction_alerts_created": pred_result["prediction_alerts_created"]
         }), 200
 
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to generate alerts"}), 500
