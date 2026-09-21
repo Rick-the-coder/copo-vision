@@ -33,8 +33,8 @@ def get_co_attainment():
 
         return jsonify({"status": "success", "total_records": len(records), "attainment": records}), 200
 
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve CO attainment"}), 500
 
 
 @copo_bp.route("/po-attainment", methods=["GET"])
@@ -59,8 +59,8 @@ def get_po_attainment():
 
         return jsonify({"status": "success", "total_records": len(records), "attainment": records}), 200
 
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve PO attainment"}), 500
 
 
 @copo_bp.route("/calculate", methods=["POST"])
@@ -76,5 +76,5 @@ def calculate_attainment():
             "po_records_written": po_result["records_written"]
         }), 200
 
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to calculate attainment"}), 500
