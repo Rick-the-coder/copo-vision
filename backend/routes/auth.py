@@ -70,5 +70,5 @@ def login():
             }
         }), 200
 
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "An error occurred during authentication"}), 500
