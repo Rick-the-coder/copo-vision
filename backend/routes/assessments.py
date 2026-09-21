@@ -67,10 +67,10 @@ def get_assessments():
             "assessments": formatted
         }), 200
 
-    except Exception as e:
+    except Exception:
         return jsonify({
             "status": "error",
-            "message": str(e)
+            "message": "Failed to retrieve assessments"
         }), 500
     finally:
         if conn: conn.close()
@@ -99,8 +99,8 @@ def create_assessment():
         cursor.close()
 
         return jsonify({"status": "success", "id": new_id, "message": "Assessment created"}), 201
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to create assessment"}), 500
     finally:
         if conn: conn.close()
 
@@ -123,8 +123,8 @@ def update_assessment(assessment_id):
         cursor.close()
 
         return jsonify({"status": "success", "message": "Assessment updated"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to update assessment"}), 500
     finally:
         if conn: conn.close()
 
@@ -140,7 +140,7 @@ def delete_assessment(assessment_id):
         cursor.close()
 
         return jsonify({"status": "success", "message": "Assessment deleted"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to delete assessment"}), 500
     finally:
         if conn: conn.close()
