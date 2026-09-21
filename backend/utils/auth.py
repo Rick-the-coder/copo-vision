@@ -109,9 +109,10 @@ def authenticate_request():
         return None
 
     except Exception as e:
+        logging.error(f"Database error during authentication: {e}")
         return jsonify({
             "status": "error",
-            "message": f"Database error during authentication: {str(e)}"
+            "message": "Database error during authentication"
         }), 500
     finally:
         if cursor:
