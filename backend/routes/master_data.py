@@ -30,8 +30,8 @@ def get_departments():
                 "status": True
             })
         return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve departments"}), 500
     finally:
         if conn: conn.close()
 
@@ -51,8 +51,8 @@ def create_department():
         new_id = cursor.lastrowid
         cursor.close()
         return jsonify({"status": "success", "id": new_id, "message": "Department created"}), 201
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to create department"}), 500
     finally:
         if conn: conn.close()
 
@@ -70,8 +70,8 @@ def update_department(dept_id):
         conn.commit()
         cursor.close()
         return jsonify({"status": "success", "message": "Department updated"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to update department"}), 500
     finally:
         if conn: conn.close()
 
@@ -85,8 +85,8 @@ def delete_department(dept_id):
         conn.commit()
         cursor.close()
         return jsonify({"status": "success", "message": "Department deleted"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to delete department"}), 500
     finally:
         if conn: conn.close()
 
@@ -124,8 +124,8 @@ def get_courses():
                 "status": True
             })
         return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve courses"}), 500
     finally:
         if conn: conn.close()
 
@@ -150,8 +150,8 @@ def create_course():
         new_id = cursor.lastrowid
         cursor.close()
         return jsonify({"status": "success", "id": new_id, "message": "Course created"}), 201
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to create course"}), 500
     finally:
         if conn: conn.close()
 
@@ -174,8 +174,8 @@ def update_course(course_id):
         conn.commit()
         cursor.close()
         return jsonify({"status": "success", "message": "Course updated"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to update course"}), 500
     finally:
         if conn: conn.close()
 
@@ -189,8 +189,8 @@ def delete_course(course_id):
         conn.commit()
         cursor.close()
         return jsonify({"status": "success", "message": "Course deleted"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to delete course"}), 500
     finally:
         if conn: conn.close()
 
@@ -229,8 +229,8 @@ def get_subjects():
                 "status": True
             })
         return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve subjects"}), 500
     finally:
         if conn: conn.close()
 
@@ -255,8 +255,8 @@ def create_subject():
         new_id = cursor.lastrowid
         cursor.close()
         return jsonify({"status": "success", "id": new_id, "message": "Subject created"}), 201
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to create subject"}), 500
     finally:
         if conn: conn.close()
 
@@ -279,8 +279,8 @@ def update_subject(sub_id):
         conn.commit()
         cursor.close()
         return jsonify({"status": "success", "message": "Subject updated"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to update subject"}), 500
     finally:
         if conn: conn.close()
 
@@ -294,8 +294,8 @@ def delete_subject(sub_id):
         conn.commit()
         cursor.close()
         return jsonify({"status": "success", "message": "Subject deleted"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to delete subject"}), 500
     finally:
         if conn: conn.close()
 
@@ -327,8 +327,8 @@ def get_faculty():
                 "status": bool(r["is_active"])
             })
         return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve faculty"}), 500
     finally:
         if conn: conn.close()
 
@@ -370,8 +370,8 @@ def get_users():
                 "status": bool(r["is_active"])
             })
         return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve users"}), 500
     finally:
         if conn: conn.close()
 
@@ -426,8 +426,8 @@ def get_academic_years():
                 "status": True
             })
         return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve academic years"}), 500
     finally:
         if conn: conn.close()
 
@@ -445,8 +445,8 @@ def create_academic_year():
         new_id = cursor.lastrowid
         cursor.close()
         return jsonify({"status": "success", "id": new_id, "message": "Academic Year created"}), 201
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to create academic year"}), 500
     finally:
         if conn: conn.close()
 
@@ -568,8 +568,8 @@ def get_course_outcomes():
                 "status": True
             })
         return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve course outcomes"}), 500
     finally:
         if conn: conn.close()
 
@@ -603,8 +603,8 @@ def get_program_outcomes():
                 "status": True
             })
         return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve program outcomes"}), 500
     finally:
         if conn: conn.close()
 
@@ -637,8 +637,8 @@ def get_psos():
                 "status": True
             })
         return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve program specific outcomes"}), 500
     finally:
         if conn: conn.close()
 
@@ -711,8 +711,8 @@ def get_copo_matrix(course_id):
             "psos": psos,
             "matrix": matrix
         }), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve CO-PO matrix"}), 500
     finally:
         if conn: conn.close()
 
