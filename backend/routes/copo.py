@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify
 from config.database import get_db_connection
 from services.attainment import calculate_all_student_co_attainment, calculate_all_student_po_attainment
+from utils.auth import require_roles
 
 copo_bp = Blueprint(
     "copo",
@@ -63,6 +64,7 @@ def get_po_attainment():
 
 
 @copo_bp.route("/calculate", methods=["POST"])
+@require_roles("admin", "hod")
 def calculate_attainment():
     try:
         co_result = calculate_all_student_co_attainment()
