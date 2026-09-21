@@ -107,12 +107,11 @@ def health():
             "database": "not connected"
         }), 500
 
-    except Exception as e:
-
+    except Exception:
         return jsonify({
             "status": "error",
             "database": "connection failed",
-            "message": str(e)
+            "message": "Database connection failed"
         }), 500
 
     finally:
