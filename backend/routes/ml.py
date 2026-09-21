@@ -1,5 +1,6 @@
 import datetime
 from flask import Blueprint, jsonify, request
+from werkzeug.utils import secure_filename
 from config.database import get_db_connection
 
 ml_bp = Blueprint("ml", __name__, url_prefix="/api/ml")
@@ -35,7 +36,7 @@ def get_datasets():
 def upload_dataset():
     file = request.files.get("file")
     version_name = request.form.get("version_name", f"v{len(uploaded_datasets)+1}.0")
-    file_name = file.filename if file else "uploaded_data.csv"
+    file_name = secure_filename(file.filename) if file and file.filename else "uploaded_data.csv"
     
     new_item = {
         "id": len(uploaded_datasets) + 1,
@@ -103,7 +104,7 @@ def get_models():
                 }
             ]
         return jsonify(models), 200
-    except Exception as e:
+    except Exception:
         return jsonify([
             {
                 "id": 1,
