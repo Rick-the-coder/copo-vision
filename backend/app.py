@@ -1,7 +1,8 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from config.database import get_db_connection
+from utils.auth import authenticate_request
 
 from routes.auth import auth_bp
 from routes.students import students_bp
@@ -12,6 +13,9 @@ from routes.dashboard import dashboard_bp
 from routes.predictions import predictions_bp
 from routes.uploads import uploads_bp
 from routes.nlp import nlp_bp
+from routes.master_data import master_data_bp
+from routes.analytics import analytics_bp
+from routes.ml import ml_bp
 
 
 # ==========================================
@@ -22,6 +26,31 @@ app = Flask(__name__)
 
 # Allow React frontend to communicate with Flask
 CORS(app)
+
+
+# ==========================================
+# GLOBAL AUTHENTICATION MIDDLEWARE
+# ==========================================
+
+PUBLIC_ROUTES = {
+    "/",
+    "/health",
+    "/api/auth/login",
+}
+
+@app.before_request
+def enforce_authentication():
+    # Allow CORS preflight requests
+    if request.method == "OPTIONS":
+        return None
+
+    # Normalize path (strip trailing slash if length > 1)
+    normalized_path = request.path.rstrip("/") if len(request.path) > 1 else request.path
+
+    if normalized_path in PUBLIC_ROUTES or request.path in PUBLIC_ROUTES:
+        return None
+
+    return authenticate_request()
 
 
 # ==========================================
@@ -37,6 +66,9 @@ app.register_blueprint(dashboard_bp)
 app.register_blueprint(predictions_bp)
 app.register_blueprint(uploads_bp)
 app.register_blueprint(nlp_bp)
+app.register_blueprint(master_data_bp)
+app.register_blueprint(analytics_bp)
+app.register_blueprint(ml_bp)
 
 
 # ==========================================
