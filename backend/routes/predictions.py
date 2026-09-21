@@ -193,14 +193,13 @@ def generate_predictions():
             "predictions": prediction_records
         }), 200
 
-    except Exception as e:
-
+    except Exception:
         if connection:
             connection.rollback()
 
         return jsonify({
             "status": "error",
-            "message": str(e)
+            "message": "Failed to generate predictions"
         }), 500
 
     finally:
@@ -248,11 +247,10 @@ def get_predictions():
             "predictions": predictions
         }), 200
 
-    except Exception as e:
-
+    except Exception:
         return jsonify({
             "status": "error",
-            "message": str(e)
+            "message": "Failed to retrieve predictions"
         }), 500
 
     finally:
