@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import DashboardLayout from './components/layout/DashboardLayout';
+import DashboardHome from './pages/dashboard/DashboardHome';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 import Departments from './pages/dashboard/Departments';
 import Courses from './pages/dashboard/Courses';
@@ -67,7 +68,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           
           <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<AdminDashboard />} />
+            <Route index element={<DashboardHome />} />
             <Route path="programs" element={<ProgramsPage />} />
             <Route path="batches" element={<BatchesPage />} />
             <Route path="sections" element={<SectionsPage />} />

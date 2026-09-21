@@ -1,6 +1,9 @@
 import os
+import uuid
+import logging
 import pandas as pd
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
+from werkzeug.utils import secure_filename
 from config.database import get_db_connection
 
 uploads_bp = Blueprint(
@@ -35,15 +38,24 @@ def upload_marks():
 
     file = request.files["file"]
     assessment_id = request.form.get("assessment_id")
-    uploaded_by = request.form.get("uploaded_by")
+    
+    # Bind caller identity to authenticated user context (prevent client identity spoofing)
+    uploaded_by = g.current_user["user_id"] if hasattr(g, "current_user") and g.current_user else request.form.get("uploaded_by")
 
     if not assessment_id:
         return jsonify({"status": "error", "message": "assessment_id is required"}), 400
 
-    if not file.filename.endswith((".xlsx", ".xls")):
+    original_filename = file.filename or ""
+    safe_name = secure_filename(original_filename)
+    if not safe_name or not safe_name.lower().endswith((".xlsx", ".xls")):
         return jsonify({"status": "error", "message": "File must be .xlsx or .xls"}), 400
 
-    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+    unique_filename = f"{uuid.uuid4().hex}_{safe_name}"
+    base_dir = os.path.abspath(UPLOAD_FOLDER)
+    filepath = os.path.abspath(os.path.join(base_dir, unique_filename))
+    if not filepath.startswith(base_dir):
+        return jsonify({"status": "error", "message": "Invalid file path"}), 400
+
     file.save(filepath)
 
     connection = None
@@ -161,7 +173,22 @@ def upload_marks():
             "errors": row_errors
         }), 200
 
+    except ValueError as ve:
+        if connection:
+            connection.rollback()
+            if upload_id and cursor:
+                try:
+                    cursor.execute(
+                        "UPDATE upload_batches SET status = 'failed' WHERE upload_id = %s",
+                        (upload_id,)
+                    )
+                    connection.commit()
+                except Exception:
+                    pass
+        return jsonify({"status": "error", "message": str(ve)}), 400
+
     except Exception as e:
+        logging.error(f"Error processing marks upload: {e}")
         if connection:
             connection.rollback()
             if upload_id and cursor:
@@ -174,9 +201,14 @@ def upload_marks():
                 except Exception:
                     pass
 
-        return jsonify({"status": "error", "message": str(e)}), 400
+        return jsonify({"status": "error", "message": "Failed to process marks file upload"}), 500
 
     finally:
+        if os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+            except Exception:
+                pass
         if cursor:
             cursor.close()
         if connection:

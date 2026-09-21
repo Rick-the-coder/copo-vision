@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/v1',
+  baseURL: 'http://127.0.0.1:5000/api',
 });
 
 api.interceptors.request.use((config) => {
@@ -13,10 +13,23 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const data = response.data;
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      if (Array.isArray(data.students)) {
+        response.data = data.students;
+      } else if (Array.isArray(data.assessments)) {
+        response.data = data.assessments;
+      } else if (Array.isArray(data.alerts)) {
+        response.data = data.alerts;
+      }
+    }
+    return response;
+  },
   (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/login';
     }
     return Promise.reject(error);

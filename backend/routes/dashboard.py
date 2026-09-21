@@ -4,11 +4,64 @@ from config.database import get_db_connection
 dashboard_bp = Blueprint(
     "dashboard",
     __name__,
-    url_prefix="/api/dashboard"
+    url_prefix="/api"
 )
 
 
-@dashboard_bp.route("/summary", methods=["GET"])
+@dashboard_bp.route("/stats", methods=["GET"])
+@dashboard_bp.route("/dashboard/stats", methods=["GET"])
+def dashboard_stats():
+    connection = None
+    cursor = None
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("SELECT COUNT(*) AS c FROM departments")
+        departments = cursor.fetchone()["c"]
+
+        cursor.execute("SELECT COUNT(*) AS c FROM courses")
+        courses = cursor.fetchone()["c"]
+
+        cursor.execute("SELECT COUNT(*) AS c FROM subjects")
+        subjects = cursor.fetchone()["c"]
+
+        cursor.execute("SELECT COUNT(*) AS c FROM students")
+        students = cursor.fetchone()["c"]
+
+        cursor.execute("SELECT COUNT(*) AS c FROM users WHERE role = 'faculty'")
+        faculty = cursor.fetchone()["c"]
+
+        cursor.execute("SELECT COUNT(*) AS c FROM users")
+        users = cursor.fetchone()["c"]
+
+        cursor.execute("SELECT COUNT(*) AS c FROM course_outcomes")
+        cos = cursor.fetchone()["c"]
+
+        cursor.execute("SELECT COUNT(*) AS c FROM program_outcomes")
+        pos = cursor.fetchone()["c"]
+
+        return jsonify({
+            "status": "success",
+            "departments": departments,
+            "courses": courses,
+            "subjects": subjects,
+            "students": students,
+            "faculty": faculty,
+            "users": users,
+            "cos": cos,
+            "pos": pos
+        }), 200
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve dashboard statistics"}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+@dashboard_bp.route("/dashboard/summary", methods=["GET"])
 def dashboard_summary():
 
     connection = None
@@ -92,11 +145,10 @@ def dashboard_summary():
             }
         }), 200
 
-    except Exception as e:
-
+    except Exception:
         return jsonify({
             "status": "error",
-            "message": str(e)
+            "message": "Failed to retrieve dashboard summary"
         }), 500
 
     finally:

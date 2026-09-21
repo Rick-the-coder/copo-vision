@@ -4,7 +4,7 @@ import api from '../../services/api';
 import { 
   LayoutDashboard, Users, BookOpen, LogOut, Menu, X, GraduationCap, Building2, 
   Calendar, Settings, PlayCircle, Database, BrainCircuit, Activity, BarChart2,
-  ChevronDown, Search, Bell, ChevronLeft, ChevronRight
+  ChevronDown, Search, Bell, ChevronLeft, ChevronRight, Award, ClipboardCheck
 } from 'lucide-react';
 
 interface User {
@@ -24,18 +24,30 @@ const DashboardLayout = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) { navigate('/login'); return; }
+    const token = localStorage.getItem('token');
+    if (!token) { 
+      navigate('/login'); 
+      return; 
+    }
+    
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
       try {
-        const response = await api.get('/users/me');
-        setUser(response.data);
-      } catch (error) {
-        localStorage.removeItem('token');
-        navigate('/login');
+        const parsed = JSON.parse(savedUser);
+        setUser({
+          id: parsed.user_id || parsed.id || 1,
+          name: parsed.full_name || parsed.name || parsed.username || 'User',
+          email: parsed.username || parsed.email || 'user@copovision.edu',
+          role: (parsed.role || 'ADMIN').toUpperCase()
+        });
+        return;
+      } catch (e) {
+        console.error("Failed to parse stored user", e);
       }
-    };
-    fetchUser();
+    }
+    
+    // Default fallback
+    setUser({ id: 1, name: 'Admin User', email: 'admin@copovision.edu', role: 'ADMIN' });
   }, [navigate]);
 
   const handleLogout = () => {
@@ -43,66 +55,200 @@ const DashboardLayout = () => {
     navigate('/login');
   };
 
-  const allowedItems = (role: string) => {
-    switch (role) {
-      case 'ADMIN': return ['Dashboard', 'Departments', 'Faculty', 'Students', 'Subjects', 'Marks Entry', 'Program Outcomes', 'Course Outcomes', 'CO-PO Mapping'];
-      case 'HOD': return ['Dashboard', 'Faculty', 'Students', 'Subjects', 'Marks Entry', 'Program Outcomes', 'Course Outcomes', 'CO-PO Mapping'];
-      case 'FACULTY': return ['Dashboard', 'Students', 'Subjects', 'Marks Entry', 'Course Outcomes', 'CO-PO Mapping'];
-      default: return ['Dashboard'];
+  const getNavGroups = (userRole: string) => {
+    const role = (userRole || 'ADMIN').toUpperCase();
+
+    if (role === 'STUDENT') {
+      return [
+        {
+          label: "My Learning Portal",
+          items: [
+            { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-[18px] h-[18px]" /> },
+          ]
+        },
+        {
+          label: "My Outcomes & Progress",
+          items: [
+            { name: 'My CO Attainment', path: '/dashboard/student-co-view', icon: <Award className="w-[18px] h-[18px]" /> },
+            { name: 'My PO Attainment', path: '/dashboard/student-po-view', icon: <BarChart2 className="w-[18px] h-[18px]" /> },
+          ]
+        },
+        {
+          label: "Account",
+          items: [
+            { name: 'Profile Settings', path: '/dashboard/settings', icon: <Settings className="w-[18px] h-[18px]" /> },
+          ]
+        }
+      ];
     }
+
+    if (role === 'FACULTY') {
+      return [
+        {
+          label: "Overview",
+          items: [
+            { name: 'Faculty Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-[18px] h-[18px]" /> },
+          ]
+        },
+        {
+          label: "My Teaching & Classes",
+          items: [
+            { name: 'Assigned Subjects', path: '/dashboard/subjects', icon: <BookOpen className="w-[18px] h-[18px]" /> },
+            { name: 'My Students', path: '/dashboard/students', icon: <Users className="w-[18px] h-[18px]" /> },
+            { name: 'Question Bank', path: '/dashboard/question-bank', icon: <Database className="w-[18px] h-[18px]" /> },
+          ]
+        },
+        {
+          label: "Assessments & Grading",
+          items: [
+            { name: 'Assessments', path: '/dashboard/assessments', icon: <Activity className="w-[18px] h-[18px]" /> },
+            { name: 'Marks Entry', path: '/dashboard/marks-entry', icon: <ClipboardCheck className="w-[18px] h-[18px]" /> },
+          ]
+        },
+        {
+          label: "OBE Attainment",
+          items: [
+            { name: 'Course Outcomes', path: '/dashboard/course-outcomes', icon: <BookOpen className="w-[18px] h-[18px]" /> },
+            { name: 'CO-PO Mapping', path: '/dashboard/co-po-mapping', icon: <Settings className="w-[18px] h-[18px]" /> },
+            { name: 'Calculate CO', path: '/dashboard/calculate-co', icon: <BarChart2 className="w-[18px] h-[18px]" /> },
+          ]
+        },
+        {
+          label: "AI & Predictions",
+          items: [
+            { name: 'Student Risk AI', path: '/dashboard/ml-prediction', icon: <BrainCircuit className="w-[18px] h-[18px]" /> },
+          ]
+        },
+        {
+          label: "Account",
+          items: [
+            { name: 'Profile Settings', path: '/dashboard/settings', icon: <Settings className="w-[18px] h-[18px]" /> },
+          ]
+        }
+      ];
+    }
+
+    if (role === 'HOD') {
+      return [
+        {
+          label: "Department Leadership",
+          items: [
+            { name: 'HOD Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-[18px] h-[18px]" /> },
+          ]
+        },
+        {
+          label: "Department Scope",
+          items: [
+            { name: 'Courses', path: '/dashboard/courses', icon: <GraduationCap className="w-[18px] h-[18px]" /> },
+            { name: 'Subjects', path: '/dashboard/subjects', icon: <BookOpen className="w-[18px] h-[18px]" /> },
+            { name: 'Department Faculty', path: '/dashboard/faculty', icon: <Users className="w-[18px] h-[18px]" /> },
+            { name: 'Students', path: '/dashboard/students', icon: <Users className="w-[18px] h-[18px]" /> },
+          ]
+        },
+        {
+          label: "Assessments & Marks",
+          items: [
+            { name: 'Assessments', path: '/dashboard/assessments', icon: <Activity className="w-[18px] h-[18px]" /> },
+            { name: 'Question Bank', path: '/dashboard/question-bank', icon: <Database className="w-[18px] h-[18px]" /> },
+            { name: 'Marks Entry', path: '/dashboard/marks-entry', icon: <ClipboardCheck className="w-[18px] h-[18px]" /> },
+          ]
+        },
+        {
+          label: "OBE Oversight & NBA",
+          items: [
+            { name: 'Course Outcomes', path: '/dashboard/course-outcomes', icon: <BookOpen className="w-[18px] h-[18px]" /> },
+            { name: 'Program Outcomes', path: '/dashboard/program-outcomes', icon: <Award className="w-[18px] h-[18px]" /> },
+            { name: 'PSOs', path: '/dashboard/psos', icon: <Award className="w-[18px] h-[18px]" /> },
+            { name: 'CO-PO Matrix', path: '/dashboard/co-po-mapping', icon: <Settings className="w-[18px] h-[18px]" /> },
+            { name: 'CO Attainment', path: '/dashboard/calculate-co', icon: <BarChart2 className="w-[18px] h-[18px]" /> },
+            { name: 'PO Attainment', path: '/dashboard/calculate-po', icon: <BarChart2 className="w-[18px] h-[18px]" /> },
+          ]
+        },
+        {
+          label: "Analytics & Intelligence",
+          items: [
+            { name: 'Dept Analytics', path: '/dashboard/analytics-dashboard', icon: <Activity className="w-[18px] h-[18px]" /> },
+            { name: 'AI Predictions', path: '/dashboard/ml-prediction', icon: <BrainCircuit className="w-[18px] h-[18px]" /> },
+          ]
+        },
+        {
+          label: "Management",
+          items: [
+            { name: 'Reports', path: '/dashboard/reports', icon: <Database className="w-[18px] h-[18px]" /> },
+            { name: 'Settings', path: '/dashboard/settings', icon: <Settings className="w-[18px] h-[18px]" /> },
+          ]
+        }
+      ];
+    }
+
+    // Default: ADMIN / SUPERADMIN (Full Access)
+    return [
+      {
+        label: "University Overview",
+        items: [
+          { name: 'Admin Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-[18px] h-[18px]" /> },
+        ]
+      },
+      {
+        label: "Academic Management",
+        items: [
+          { name: 'Departments', path: '/dashboard/departments', icon: <Building2 className="w-[18px] h-[18px]" /> },
+          { name: 'Courses', path: '/dashboard/courses', icon: <GraduationCap className="w-[18px] h-[18px]" /> },
+          { name: 'Subjects', path: '/dashboard/subjects', icon: <BookOpen className="w-[18px] h-[18px]" /> },
+          { name: 'Academic Years', path: '/dashboard/academic-years', icon: <Calendar className="w-[18px] h-[18px]" /> },
+          { name: 'Semesters', path: '/dashboard/semesters', icon: <Calendar className="w-[18px] h-[18px]" /> },
+          { name: 'Batches', path: '/dashboard/batches', icon: <Calendar className="w-[18px] h-[18px]" /> },
+          { name: 'Sections', path: '/dashboard/sections', icon: <Users className="w-[18px] h-[18px]" /> },
+        ]
+      },
+      {
+        label: "People Management",
+        items: [
+          { name: 'Faculty', path: '/dashboard/faculty', icon: <Users className="w-[18px] h-[18px]" /> },
+          { name: 'Students', path: '/dashboard/students', icon: <Users className="w-[18px] h-[18px]" /> },
+          { name: 'System Users', path: '/dashboard/users', icon: <Users className="w-[18px] h-[18px]" /> },
+        ]
+      },
+      {
+        label: "Assessment Management",
+        items: [
+          { name: 'Assessments', path: '/dashboard/assessments', icon: <Activity className="w-[18px] h-[18px]" /> },
+          { name: 'Question Bank', path: '/dashboard/question-bank', icon: <Database className="w-[18px] h-[18px]" /> },
+          { name: 'Marks Entry', path: '/dashboard/marks-entry', icon: <ClipboardCheck className="w-[18px] h-[18px]" /> },
+        ]
+      },
+      {
+        label: "Outcome Management",
+        items: [
+          { name: 'Course Outcomes', path: '/dashboard/course-outcomes', icon: <BookOpen className="w-[18px] h-[18px]" /> },
+          { name: 'Program Outcomes', path: '/dashboard/program-outcomes', icon: <Award className="w-[18px] h-[18px]" /> },
+          { name: 'PSOs', path: '/dashboard/psos', icon: <Award className="w-[18px] h-[18px]" /> },
+          { name: 'CO-PO Mapping', path: '/dashboard/co-po-mapping', icon: <Settings className="w-[18px] h-[18px]" /> },
+          { name: 'CO Attainment', path: '/dashboard/calculate-co', icon: <BarChart2 className="w-[18px] h-[18px]" /> },
+          { name: 'PO Attainment', path: '/dashboard/calculate-po', icon: <BarChart2 className="w-[18px] h-[18px]" /> },
+        ]
+      },
+      {
+        label: "Analytics & AI",
+        items: [
+          { name: 'Analytics', path: '/dashboard/analytics-dashboard', icon: <Activity className="w-[18px] h-[18px]" /> },
+          { name: 'AI Prediction', path: '/dashboard/ml-prediction', icon: <BrainCircuit className="w-[18px] h-[18px]" /> },
+          { name: 'ML Datasets', path: '/dashboard/ml-datasets', icon: <Database className="w-[18px] h-[18px]" /> },
+          { name: 'Model Training', path: '/dashboard/ml-training', icon: <BrainCircuit className="w-[18px] h-[18px]" /> },
+        ]
+      },
+      {
+        label: "System & Governance",
+        items: [
+          { name: 'Audit Logs', path: '/dashboard/audit', icon: <Activity className="w-[18px] h-[18px]" /> },
+          { name: 'Reports', path: '/dashboard/reports', icon: <Database className="w-[18px] h-[18px]" /> },
+          { name: 'Settings', path: '/dashboard/settings', icon: <Settings className="w-[18px] h-[18px]" /> },
+        ]
+      }
+    ];
   };
 
-  const navGroups = [
-    {
-      label: "Overview",
-      items: [
-        { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard className="w-[18px] h-[18px]" /> },
-      ]
-    },
-    {
-      label: "Academic Management",
-      items: [
-        { name: 'Departments', path: '/dashboard/departments', icon: <Building2 className="w-[18px] h-[18px]" /> },
-        { name: 'Courses', path: '/dashboard/courses', icon: <GraduationCap className="w-[18px] h-[18px]" /> },
-        { name: 'Subjects', path: '/dashboard/subjects', icon: <BookOpen className="w-[18px] h-[18px]" /> },
-        { name: 'Academic Years', path: '/dashboard/academic-years', icon: <Calendar className="w-[18px] h-[18px]" /> },
-      ]
-    },
-    {
-      label: "Assessment Management",
-      items: [
-        { name: 'Assessments', path: '/dashboard/assessments', icon: <Activity className="w-[18px] h-[18px]" /> },
-        { name: 'Question Bank', path: '/dashboard/question-bank', icon: <Database className="w-[18px] h-[18px]" /> },
-        { name: 'Marks Entry', path: '/dashboard/marks-entry', icon: <Users className="w-[18px] h-[18px]" /> },
-      ]
-    },
-    {
-      label: "Outcome Management",
-      items: [
-        { name: 'Course Outcomes', path: '/dashboard/course-outcomes', icon: <BookOpen className="w-[18px] h-[18px]" /> },
-        { name: 'CO-PO Mapping', path: '/dashboard/co-po-mapping', icon: <Settings className="w-[18px] h-[18px]" /> },
-        { name: 'CO Attainment', path: '/dashboard/calculate-co', icon: <BarChart2 className="w-[18px] h-[18px]" /> },
-        { name: 'PO Attainment', path: '/dashboard/calculate-po', icon: <BarChart2 className="w-[18px] h-[18px]" /> },
-      ]
-    },
-    {
-      label: "Analytics & AI",
-      items: [
-        { name: 'Analytics', path: '/dashboard/analytics-dashboard', icon: <Activity className="w-[18px] h-[18px]" /> },
-        { name: 'Prediction', path: '/dashboard/ml-prediction', icon: <BrainCircuit className="w-[18px] h-[18px]" /> },
-      ]
-    },
-    {
-      label: "System",
-      items: [
-        { name: 'Reports', path: '/dashboard/reports', icon: <Database className="w-[18px] h-[18px]" /> },
-        { name: 'Settings', path: '/dashboard/settings', icon: <Settings className="w-[18px] h-[18px]" /> },
-      ]
-    }
-  ].map(group => ({
-    ...group,
-    items: group.items // Allowing all roles to see all for now to demonstrate 50% frontend.
-  })).filter(group => group.items.length > 0);
+  const navGroups = getNavGroups(user?.role || 'ADMIN');
 
   if (!user) return <div className="min-h-screen flex items-center justify-center bg-slate-50">Loading...</div>;
 

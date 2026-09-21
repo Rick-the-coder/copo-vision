@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify
 from config.database import get_db_connection
 from services.attainment import calculate_all_student_co_attainment, calculate_all_student_po_attainment
+from utils.auth import require_roles
 
 copo_bp = Blueprint(
     "copo",
@@ -32,8 +33,8 @@ def get_co_attainment():
 
         return jsonify({"status": "success", "total_records": len(records), "attainment": records}), 200
 
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve CO attainment"}), 500
 
 
 @copo_bp.route("/po-attainment", methods=["GET"])
@@ -58,11 +59,12 @@ def get_po_attainment():
 
         return jsonify({"status": "success", "total_records": len(records), "attainment": records}), 200
 
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to retrieve PO attainment"}), 500
 
 
 @copo_bp.route("/calculate", methods=["POST"])
+@require_roles("admin", "hod")
 def calculate_attainment():
     try:
         co_result = calculate_all_student_co_attainment()
@@ -74,5 +76,5 @@ def calculate_attainment():
             "po_records_written": po_result["records_written"]
         }), 200
 
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        return jsonify({"status": "error", "message": "Failed to calculate attainment"}), 500

@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 from config.database import get_db_connection
+from utils.auth import require_roles
 
 import numpy as np
 from sklearn.linear_model import LinearRegression
@@ -13,6 +14,7 @@ predictions_bp = Blueprint(
 
 
 @predictions_bp.route("/generate", methods=["POST"])
+@require_roles("admin", "hod")
 def generate_predictions():
 
     connection = None
@@ -191,14 +193,13 @@ def generate_predictions():
             "predictions": prediction_records
         }), 200
 
-    except Exception as e:
-
+    except Exception:
         if connection:
             connection.rollback()
 
         return jsonify({
             "status": "error",
-            "message": str(e)
+            "message": "Failed to generate predictions"
         }), 500
 
     finally:
@@ -246,11 +247,10 @@ def get_predictions():
             "predictions": predictions
         }), 200
 
-    except Exception as e:
-
+    except Exception:
         return jsonify({
             "status": "error",
-            "message": str(e)
+            "message": "Failed to retrieve predictions"
         }), 500
 
     finally:
